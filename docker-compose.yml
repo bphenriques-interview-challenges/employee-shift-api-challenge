@@ -1,0 +1,41 @@
+version: '3.5'
+
+services:
+
+  common: &BASE
+    build:
+      context: ""
+      target: BUILD_IMAGE
+    environment:
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/postgres
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD:
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_FLYWAY_LOCATIONS: filesystem:/app/db/migration
+    depends_on:
+      - postgres
+
+  tests:
+    <<: *BASE
+    command: dockerize
+              -wait tcp://postgres:5432
+              -timeout 5m -wait-retry-interval 2s
+          sh -c '/app/gradlew test'
+
+  employee-shifts-api:
+    build:
+      context: ""
+      target: PRD_IMAGE
+    env_file:
+      - environment.docker.env
+    command: java -XX:+UseG1GC -XX:+CrashOnOutOfMemoryError -Xmx512m -Xms512m -jar employee-shift-api.jar
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080
+      - 8081:8081
+
+  postgres:
+    image: postgres:11.2
+    ports:
+      - 5432:5432
