@@ -1,15 +1,25 @@
 ROOT_DIR=$(shell pwd)
 
+#
+# Main Targets
+#
+.PHONY: test
+test:
+	sh $(ROOT_DIR)/ci/test.sh
+
+.PHONY: run-dockerized
+run-dockerized:
+	docker-compose up --build employee-shifts-api
+
+#
+# Local development
+#
 .PHONY: run
 run:
 	docker-compose up -d postgres
 	echo "Waiting for dependencies to start..."
-	sleep 10 # Replace with proper pooling
-	bash -c "trap 'docker-compose down' EXIT 1; env $(shell egrep -v '^#' $(ROOT_DIR)/local.env | xargs) $(ROOT_DIR)/gradlew bootRun"
-
-.PHONY: test
-test:
-	sh $(ROOT_DIR)/ci/test.sh
+	sleep 5
+	bash -c "trap 'docker-compose down' EXIT 1; env $(shell egrep -v '^#' $(ROOT_DIR)/environment.local.env | xargs) $(ROOT_DIR)/gradlew bootRun"
 
 .PHONY: test-dependencies-up
 test-dependencies-up:
@@ -25,14 +35,3 @@ lint:
 .PHONY: format
 format:
 	$(ROOT_DIR)/gradlew ktlintFormat
-
-#
-# Docker Targets
-#
-.PHONY: build-docker-image
-build-docker-image:
-	docker build . --tag bphenriques/employee-shifts-api
-
-.PHONY: run-dockerized
-run-dockerized:
-	docker-compose up --build employee-shifts-api

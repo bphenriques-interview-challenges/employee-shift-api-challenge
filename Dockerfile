@@ -31,7 +31,7 @@ EXPOSE 8081
 FROM adoptopenjdk/openjdk11:debian-slim as PRD_IMAGE
 WORKDIR /app
 
-COPY --from=BUILD_IMAGE /app/build/libs/Employee-Shift-Api*.jar ./employee-shift-api.jar
+COPY --from=BUILD_IMAGE /app/build/libs/employee-shift-api-*.jar ./employee-shift-api.jar
 COPY --from=BUILD_IMAGE /app/db/migration ./db/migration
 
 EXPOSE 8080

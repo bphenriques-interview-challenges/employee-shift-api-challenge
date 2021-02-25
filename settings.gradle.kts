@@ -1,1 +1,1 @@
-rootProject.name = "Employee-Shift-Api"
+rootProject.name = "employee-shift-api"
