@@ -4,6 +4,6 @@ data class EmployeeNotFoundException(val employeeId: Int) : RuntimeException(
     "Can't find request employee $employeeId"
 )
 
-data class ConflictingEmployeeException(val employee: Employee) : RuntimeException(
+data class EmployeeConstraintViolationException(val employee: Employee) : RuntimeException(
     "Conflicting employee creation/update"
 )

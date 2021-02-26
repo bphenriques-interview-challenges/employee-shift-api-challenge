@@ -5,4 +5,10 @@ data class Employee(
     val firstName: String,
     val lastName: String,
     val address: String
-)
+) {
+    companion object {
+        const val MAX_LENGTH_FIRST_NAME = 50
+        const val MAX_LENGTH_LAST_NAME = 50
+        const val MAX_LENGTH_ADDRESS = 255
+    }
+}

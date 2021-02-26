@@ -1,8 +1,8 @@
 package com.bphenriques.employeeshifts.employee
 
-import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.testhelper.EmployeeTestClient
 import com.bphenriques.employeeshifts.testhelper.SQLUtil
+import com.bphenriques.employeeshifts.testhelper.newEmployee
 import com.bphenriques.test.Generator.uuid
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.IntNode
@@ -33,7 +33,7 @@ class ManagingUsersTest {
     }
 
     @Test
-    fun `Create, modify, read, delete and recreate the same employeee`() {
+    fun `Create, read, update, and delete employee details`() {
         // Create Employees for entropy (ensures lack of fixed results) and then test a specific one.
         repeat(5) { employeeTestClient.createEmployee(newEmployee()).expectStatus().isCreated }
 
@@ -60,14 +60,20 @@ class ManagingUsersTest {
         val updateEmployeeAAddress = employeeA.copy(address = uuid())
 
         val updateResponse = employeeTestClient.updateEmployee(employeeId, updateEmployeeAAddress)
-    }
+        updateResponse.expectStatus().isOk
+        updateResponse.expectHeader().contentType(MediaType.APPLICATION_JSON)
+        updateResponse.expectBody()
+            .jsonPath(".id").isEqualTo(employeeId)
+            .jsonPath(".first_name").isEqualTo(updateEmployeeAAddress.firstName)
+            .jsonPath(".last_name").isEqualTo(updateEmployeeAAddress.lastName)
+            .jsonPath(".address").isEqualTo(updateEmployeeAAddress.address)
 
-    private fun newEmployee() = Employee(
-        id = 0,
-        firstName = uuid(),
-        lastName = uuid(),
-        address = uuid()
-    )
+        val deleteResponse = employeeTestClient.deleteEmployee(employeeId)
+        deleteResponse.expectStatus().isOk
+
+        val getResponseAfterDeletion = employeeTestClient.getEmployee(employeeId)
+        getResponseAfterDeletion.expectStatus().isNotFound
+    }
 
     private fun consumeBodyAndExtractId(responseSpec: WebTestClient.ResponseSpec): Int {
         val jsonNode = responseSpec.returnResult(JsonNode::class.java).responseBody.blockFirst()!!

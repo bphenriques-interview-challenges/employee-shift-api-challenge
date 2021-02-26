@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test
 class EmployeeServiceTest {
 
     private val fixedEmployeeId = randomInt()
-    private val repository = mockk<DomainEmployeeRepository>()
+    private val repository = mockk<DomainEmployeeRepository>(relaxUnitFun = true)
     private val subject = EmployeeService(
         repository = repository
     )
 
     @Test
-    fun `createEmployee - It returns the entity returned by DomainEmployeeRepository`() = runBlocking {
+    fun `upsertEmployee - It returns the entity returned by DomainEmployeeRepository`() = runBlocking {
         val employee = Employee(
             id = 0,
             firstName = uuid(),
@@ -30,12 +30,12 @@ class EmployeeServiceTest {
             address = uuid()
         )
 
-        coEvery { repository.create(employee) } returns employee.copy(fixedEmployeeId)
+        coEvery { repository.upsert(employee) } returns employee.copy(fixedEmployeeId)
 
-        val result = subject.createEmployee(employee)
+        val result = subject.upsertEmployee(employee)
 
         Assertions.assertEquals(employee.copy(id = fixedEmployeeId), result)
-        coVerify { repository.create(employee) }
+        coVerify { repository.upsert(employee) }
         confirmVerified(repository)
     }
 
@@ -54,6 +54,14 @@ class EmployeeServiceTest {
 
         Assertions.assertEquals(savedEmployee, result)
         coVerify { repository.get(fixedEmployeeId) }
+        confirmVerified(repository)
+    }
+
+    @Test
+    fun `deleteEmployee - It invokes the repository to delete the entity`() = runBlocking {
+        subject.deleteEmployee(fixedEmployeeId)
+
+        coVerify { repository.delete(fixedEmployeeId) }
         confirmVerified(repository)
     }
 }

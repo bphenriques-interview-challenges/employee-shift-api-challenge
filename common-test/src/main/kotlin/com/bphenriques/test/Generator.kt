@@ -8,4 +8,6 @@ object Generator {
 
     fun randomInt() = random.nextInt()
     fun uuid() = UUID.randomUUID().toString()
+
+    fun stringOfLength(length: Int): String = (1..length).map { "a" }.joinToString("") { it }
 }
