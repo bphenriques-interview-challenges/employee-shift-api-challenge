@@ -1,0 +1,13 @@
+spring.profiles.active: dev
+spring.application.name: employee-shift-api
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password:
+  flyway:
+    url: jdbc:postgresql://localhost:5432/postgres
+    user: ${spring.r2dbc.username}
+    password: ${spring.r2dbc.password}
+    locations: filesystem:../db/migration

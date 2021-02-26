@@ -1,10 +1,16 @@
 version: '3.5'
 
 services:
+  # This target can be split onto three to have finer-grained CI pipelines with increasing order of complexity:
+  # - Build
+  # - Unit Test
+  # - Integration Test
+  # - Acceptance Test
   tests:
     build:
       context: .
       target: BUILD_IMAGE
+    image: bphenriques/employee-shift-api-test
     environment:
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/postgres
       SPRING_R2DBC_USERNAME: postgres
@@ -18,10 +24,11 @@ services:
     depends_on:
       - postgres
 
-  employee-shifts-api:
+  run:
     build:
       context: .
       target: PRD_IMAGE
+    image: bphenriques/employee-shift-api
     env_file:
       - environment.docker.env
     command: java -XX:+UseG1GC -XX:+CrashOnOutOfMemoryError -Xmx512m -Xms512m -jar employee-shift-api.jar

@@ -12,16 +12,22 @@ RUN apt-get update && apt-get install -y wget && \
         && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
         && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-# Download dependencies
-ADD build.gradle.kts $APP_HOME
-ADD settings.gradle.kts $APP_HOME
-ADD gradlew $APP_HOME
-ADD gradle $APP_HOME/gradle
+# Add Source Files - Main build files
+COPY build.gradle.kts $APP_HOME
+COPY settings.gradle.kts $APP_HOME
+COPY gradlew $APP_HOME
+COPY gradle $APP_HOME/gradle
+COPY buildSrc $APP_HOME/buildSrc
 
-# Build
-COPY src $APP_HOME/src
-ADD db $APP_HOME/db
-RUN $APP_HOME/gradlew clean build -x test
+# Add Source Files - Main src
+COPY common-test $APP_HOME/common-test
+COPY domain $APP_HOME/domain
+COPY infrastructure $APP_HOME/infrastructure
+COPY web-app $APP_HOME/web-app
+COPY db $APP_HOME/db
+
+# Build the Project
+RUN $APP_HOME/gradlew clean build -x test -x integrationTest -x acceptanceTest
 
 # Exposed ports.
 EXPOSE 8080
@@ -31,7 +37,7 @@ EXPOSE 8081
 FROM adoptopenjdk/openjdk11:debian-slim as PRD_IMAGE
 WORKDIR /app
 
-COPY --from=BUILD_IMAGE /app/build/libs/employee-shift-api-*.jar ./employee-shift-api.jar
+COPY --from=BUILD_IMAGE /app/web-app/build/libs/employee-shift-api.jar .
 COPY --from=BUILD_IMAGE /app/db/migration ./db/migration
 
 EXPOSE 8080

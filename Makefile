@@ -9,7 +9,7 @@ test:
 
 .PHONY: run-dockerized
 run-dockerized:
-	docker-compose up --build employee-shifts-api
+	docker-compose up --build run
 
 #
 # Local development
@@ -19,7 +19,7 @@ run:
 	docker-compose up -d postgres
 	echo "Waiting for dependencies to start..."
 	sleep 5
-	bash -c "trap 'docker-compose down' EXIT 1; env $(shell egrep -v '^#' $(ROOT_DIR)/environment.local.env | xargs) $(ROOT_DIR)/gradlew bootRun"
+	bash -c "trap 'docker-compose down' EXIT 1; env $(shell egrep -v '^#' $(ROOT_DIR)/environment.local.env | xargs) $(ROOT_DIR)/gradlew web-app:bootRun"
 
 .PHONY: test-dependencies-up
 test-dependencies-up:
