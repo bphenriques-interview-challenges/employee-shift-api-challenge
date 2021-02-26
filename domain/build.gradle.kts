@@ -11,10 +11,7 @@ plugins {
 val implementation by configurations
 val testImplementation by configurations
 dependencies {
-    implementation(project(":infrastructure"))
-
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.data:spring-data-commons")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${AppVersion.COROUTINES}")

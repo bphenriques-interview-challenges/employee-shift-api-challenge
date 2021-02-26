@@ -12,6 +12,7 @@ plugins {
 val implementation by configurations
 val testImplementation by configurations
 dependencies {
+    implementation(project(":domain"))
     implementation("org.springframework.boot:spring-boot-starter")
 
     // Coroutines

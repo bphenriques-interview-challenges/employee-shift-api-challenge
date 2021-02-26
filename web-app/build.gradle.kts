@@ -13,9 +13,10 @@ val implementation by configurations
 val testImplementation by configurations
 dependencies {
     implementation(project(":domain"))
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation(project(":infrastructure"))
 
     // Spring Boot Dependencies
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
