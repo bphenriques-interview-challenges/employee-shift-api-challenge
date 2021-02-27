@@ -19,11 +19,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.r2dbc.core.DatabaseClient
 
-@SpringBootApplication(scanBasePackageClasses = [EmployeeRepository::class, FlywayConfiguration::class])
-class TestApplication
-
 @SpringBootTest
 class EmployeeRepositoryTest {
+
+    @SpringBootApplication(scanBasePackageClasses = [EmployeeRepository::class, FlywayConfiguration::class])
+    class App
 
     @Autowired
     private lateinit var subject: EmployeeRepository
@@ -146,5 +146,21 @@ class EmployeeRepositoryTest {
         }
 
         Assertions.assertEquals(ex.employeeId, id)
+    }
+
+    @Test
+    fun `delete - It deletes the entity`() = runBlocking {
+        val employee = Employee(
+            id = 0,
+            firstName = uuid(),
+            lastName = uuid(),
+            address = uuid()
+        )
+        val savedEntity = subject.upsert(employee)
+        Assertions.assertEquals(1, SQLUtil.employee(databaseClient).count())
+
+        subject.delete(savedEntity.id)
+
+        Assertions.assertEquals(0, SQLUtil.employee(databaseClient).count())
     }
 }

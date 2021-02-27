@@ -1,8 +1,7 @@
-package com.bphenriques.employeeshifts.domain
+package com.bphenriques.employeeshifts.domain.employee.service
 
 import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.domain.employee.repository.DomainEmployeeRepository
-import com.bphenriques.employeeshifts.domain.employee.service.EmployeeService
 import com.bphenriques.test.Generator.randomInt
 import com.bphenriques.test.Generator.uuid
 import io.mockk.coEvery
@@ -22,7 +21,7 @@ class EmployeeServiceTest {
     )
 
     @Test
-    fun `upsertEmployee - It returns the entity returned by DomainEmployeeRepository`() = runBlocking {
+    fun `upsert - It returns the entity returned by DomainEmployeeRepository`() = runBlocking {
         val employee = Employee(
             id = 0,
             firstName = uuid(),
@@ -32,7 +31,7 @@ class EmployeeServiceTest {
 
         coEvery { repository.upsert(employee) } returns employee.copy(fixedEmployeeId)
 
-        val result = subject.upsertEmployee(employee)
+        val result = subject.upsert(employee)
 
         Assertions.assertEquals(employee.copy(id = fixedEmployeeId), result)
         coVerify { repository.upsert(employee) }
@@ -40,7 +39,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    fun `getEmployee - Returns the employee returned by the repository`() = runBlocking {
+    fun `get - Returns the employee returned by the repository`() = runBlocking {
         val savedEmployee = Employee(
             id = fixedEmployeeId,
             firstName = uuid(),
@@ -50,7 +49,7 @@ class EmployeeServiceTest {
 
         coEvery { repository.get(fixedEmployeeId) } returns savedEmployee
 
-        val result = subject.getEmployee(fixedEmployeeId)
+        val result = subject.get(fixedEmployeeId)
 
         Assertions.assertEquals(savedEmployee, result)
         coVerify { repository.get(fixedEmployeeId) }
@@ -58,8 +57,8 @@ class EmployeeServiceTest {
     }
 
     @Test
-    fun `deleteEmployee - It invokes the repository to delete the entity`() = runBlocking {
-        subject.deleteEmployee(fixedEmployeeId)
+    fun `delete - It invokes the repository to delete the entity`() = runBlocking {
+        subject.delete(fixedEmployeeId)
 
         coVerify { repository.delete(fixedEmployeeId) }
         confirmVerified(repository)

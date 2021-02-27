@@ -1,6 +1,7 @@
 package com.bphenriques.employeeshifts.testhelper
 
 import com.bphenriques.employeeshifts.domain.employee.model.Employee
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -15,7 +16,7 @@ class EmployeeTestClient(
             .uri("/employee")
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(JsonFixture.employee.createRequest(employee))
+            .bodyValue(JsonFixture.createRequest(employee))
             .exchange()
 
     fun getEmployee(employeeId: Int): WebTestClient.ResponseSpec =
@@ -29,12 +30,31 @@ class EmployeeTestClient(
             .uri("/employee/$employeeId")
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(JsonFixture.employee.createRequest(employee))
+            .bodyValue(JsonFixture.createRequest(employee))
             .exchange()
 
     fun deleteEmployee(employeeId: Int): WebTestClient.ResponseSpec =
         webTestClient.delete()
             .uri("/employee/$employeeId")
-            .accept(MediaType.APPLICATION_JSON)
             .exchange()
+
+    fun extractEmployee(responseSpec: WebTestClient.ResponseSpec): Employee {
+        val jsonTree = jacksonObjectMapper().readTree(responseSpec.returnResult(String::class.java).responseBody.blockFirst())
+        return Employee(
+            id = jsonTree["id"].intValue(),
+            firstName = jsonTree["first_name"].asText(),
+            lastName = jsonTree["last_name"].asText(),
+            address = jsonTree["address"].asText()
+        )
+    }
+
+    object JsonFixture {
+        fun createRequest(employee: Employee) = """
+            {
+                "first_name": "${employee.firstName}",
+                "last_name": "${employee.lastName}",
+                "address": "${employee.address}"
+            }
+        """.trimIndent()
+    }
 }

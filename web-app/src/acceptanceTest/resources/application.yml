@@ -1,5 +1,6 @@
 spring.profiles.active: dev
 spring.application.name: employee-shift-api
+logging.level.com.bphenriques: trace
 
 spring:
   r2dbc:

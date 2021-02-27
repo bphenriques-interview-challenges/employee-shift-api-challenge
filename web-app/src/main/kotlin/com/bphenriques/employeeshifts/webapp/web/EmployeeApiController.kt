@@ -27,28 +27,28 @@ class EmployeeApiController(
 ) {
 
     @PostMapping
-    suspend fun createEmployee(@Valid @RequestBody employeeRequest: CreateEmployeeRequest): ResponseEntity<EmployeeResponse> {
-        val savedEmployee = employeeService.upsertEmployee(employeeRequest.toEmployee())
+    suspend fun create(@Valid @RequestBody employeeRequest: CreateEmployeeRequest): ResponseEntity<EmployeeResponse> {
+        val savedEmployee = employeeService.upsert(employeeRequest.toEmployee())
         return ResponseEntity
             .created(URI.create("/employee/${savedEmployee.id}"))
             .body(EmployeeResponse.fromEmployee(savedEmployee))
     }
 
     @GetMapping("/{id}")
-    suspend fun getEmployee(@PathVariable id: Int): ResponseEntity<EmployeeResponse> {
-        val fetchedEmployee = employeeService.getEmployee(id)
+    suspend fun get(@PathVariable id: Int): ResponseEntity<EmployeeResponse> {
+        val fetchedEmployee = employeeService.get(id)
         return ResponseEntity.ok(EmployeeResponse.fromEmployee(fetchedEmployee))
     }
 
     @PutMapping("/{id}")
-    suspend fun updateEmployee(@PathVariable id: Int, @Valid @RequestBody employeeRequest: UpdateEmployeeRequest): ResponseEntity<EmployeeResponse> {
-        val updatedEmployee = employeeService.upsertEmployee(employeeRequest.toEmployee(id))
+    suspend fun update(@PathVariable id: Int, @Valid @RequestBody employeeRequest: UpdateEmployeeRequest): ResponseEntity<EmployeeResponse> {
+        val updatedEmployee = employeeService.upsert(employeeRequest.toEmployee(id))
         return ResponseEntity.ok(EmployeeResponse.fromEmployee(updatedEmployee))
     }
 
     @DeleteMapping("/{id}")
-    suspend fun deleteEmployee(@PathVariable id: Int): ResponseEntity<Unit> {
-        employeeService.deleteEmployee(id)
+    suspend fun delete(@PathVariable id: Int): ResponseEntity<Unit> {
+        employeeService.delete(id)
         return ResponseEntity.ok().build()
     }
 }
@@ -65,7 +65,7 @@ class EmployeeApiControllerErrorHandling {
     }
 
     @ExceptionHandler(EmployeeConstraintViolationException::class)
-    fun handleEConflictingEmployeeException(ex: EmployeeConstraintViolationException): ResponseEntity<ErrorResponse> {
+    fun handleConflictingEmployeeException(ex: EmployeeConstraintViolationException): ResponseEntity<ErrorResponse> {
         logger.warn(ex.message, ex)
         return ApiError.EMPLOYEE_CONFLICTING_OPERATION.toResponseEntity()
     }

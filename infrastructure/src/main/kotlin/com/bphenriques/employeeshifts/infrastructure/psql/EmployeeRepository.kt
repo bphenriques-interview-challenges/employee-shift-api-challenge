@@ -21,16 +21,15 @@ class EmployeeRepository(
 
     override suspend fun upsert(employee: Employee): Employee {
         try {
-            logger.debug("[UPSERT] $employee")
             val upsertedEmployee = rawEmployeeRepository.save(employee.toEmployeeRow())
-            logger.trace("[UPSERT] $upsertedEmployee")
+            logger.info("[UPSERT] Upserted $upsertedEmployee") // Remove PII.
             return upsertedEmployee.toEmployee()
         } catch (ex: DataIntegrityViolationException) {
-            logger.debug("[ERROR] Constraint violation when creating employee ($employee): ${ex.message}", ex)
-            throw EmployeeConstraintViolationException(employee)
+            logger.warn("[ERROR] Constraint violation when upserting employee ($employee): ${ex.message}", ex)
+            throw EmployeeConstraintViolationException(employee, ex)
         } catch (ex: BadSqlGrammarException) {
-            logger.debug("[ERROR] Field too large when creating employee: ${ex.message}", ex)
-            throw EmployeeConstraintViolationException(employee)
+            logger.warn("[ERROR] Field too large when upserting employee: ${ex.message}", ex)
+            throw EmployeeConstraintViolationException(employee, ex)
         }
     }
 
@@ -42,7 +41,7 @@ class EmployeeRepository(
     override suspend fun delete(id: Int) {
         logger.debug("[DELETE] $id")
         rawEmployeeRepository.deleteById(id)
-        logger.trace("[DELETED] $id")
+        logger.info("[DELETED] $id")
     }
 
     private fun Employee.toEmployeeRow() = EmployeeRow(

@@ -3,8 +3,8 @@ package com.bphenriques.employeeshifts.employee
 import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.testhelper.EmployeeTestClient
 import com.bphenriques.employeeshifts.testhelper.SQLUtil
-import com.bphenriques.employeeshifts.testhelper.newEmployee
 import com.bphenriques.test.Generator
+import com.bphenriques.test.Generator.newEmployee
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,10 +12,12 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.r2dbc.core.DatabaseClient
+import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-class EmployeeApiErrorTests {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+class EmployeeInvariantsTests {
 
     @Autowired
     private lateinit var employeeTestClient: EmployeeTestClient
@@ -29,26 +31,12 @@ class EmployeeApiErrorTests {
     }
 
     @Test
-    fun `GET employee id - It returns 404 when the employee does not exist`() {
-        // Arrange
-        val employeeId = Generator.randomInt()
-
-        // Act
-        val response = employeeTestClient.getEmployee(employeeId)
-
-        // Verify
-        response.expectStatus().isNotFound
-    }
-
-    @Test
     fun `POST employee - It returns 409 when the address is being used`() {
         val employee = newEmployee()
-        val createResponse = employeeTestClient.createEmployee(employee)
-        createResponse.expectStatus().isCreated
+        employeeTestClient.createEmployee(employee).expectStatus().isCreated
 
         val conflictingEmployee = newEmployee().copy(address = employee.address)
-        val conflictResponse = employeeTestClient.createEmployee(conflictingEmployee)
-        conflictResponse.expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        employeeTestClient.createEmployee(conflictingEmployee).expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }
 
     @Test
@@ -68,8 +56,7 @@ class EmployeeApiErrorTests {
         )
 
         for (violatingEmployee in violatingEmployees) {
-            val conflictResponse = employeeTestClient.createEmployee(violatingEmployee)
-            conflictResponse.expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
+            employeeTestClient.createEmployee(violatingEmployee).expectStatus().isBadRequest
         }
     }
 }

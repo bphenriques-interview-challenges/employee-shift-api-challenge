@@ -20,5 +20,18 @@ class EmployeeTableUtil(private val client: DatabaseClient) {
         .block() ?: error("Unexpected error executing query")
 }
 
+class ShiftTableUtil(private val client: DatabaseClient) {
+
+    fun clear() {
+        client.sql("DELETE FROM shift;").fetch().one().block()
+    }
+
+    fun count(): Long = client.sql("SELECT COUNT (*) FROM shift;")
+        .map { row -> row.get(0) as Long }
+        .first()
+        .block() ?: error("Unexpected error executing query")
+}
+
 // Accessors for API convenience and scope.
 fun SQLUtil.employee(client: DatabaseClient): EmployeeTableUtil = EmployeeTableUtil(client)
+fun SQLUtil.shift(client: DatabaseClient): ShiftTableUtil = ShiftTableUtil(client)

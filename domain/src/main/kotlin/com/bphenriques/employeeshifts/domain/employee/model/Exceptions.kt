@@ -1,9 +1,9 @@
 package com.bphenriques.employeeshifts.domain.employee.model
 
 data class EmployeeNotFoundException(val employeeId: Int) : RuntimeException(
-    "Can't find request employee $employeeId"
+    "Can't find requested employee $employeeId"
 )
 
-data class EmployeeConstraintViolationException(val employee: Employee) : RuntimeException(
-    "Conflicting employee creation/update"
+data class EmployeeConstraintViolationException(val employee: Employee, override val cause: Throwable) : RuntimeException(
+    "Constraint violation for employee $employee: $cause", cause
 )
