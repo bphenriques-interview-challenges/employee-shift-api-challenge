@@ -8,6 +8,7 @@ object PluginVersion {
 object AppVersion {
     const val SPRING_BOOT = "2.4.3"
     const val COROUTINES = "1.4.2"
+    const val SPRING_DOC_OPEN_API = "1.5.4"
 
     // Test
     const val MOCKK = "1.10.6"

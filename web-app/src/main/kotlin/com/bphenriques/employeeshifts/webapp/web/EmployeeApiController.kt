@@ -4,6 +4,9 @@ import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintViolationException
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeNotFoundException
 import com.bphenriques.employeeshifts.domain.employee.service.EmployeeService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -22,10 +25,12 @@ import javax.validation.constraints.Size
 
 @RestController
 @RequestMapping("employee")
+@Tag(name = "Employee", description = "Employee API")
 class EmployeeApiController(
     private val employeeService: EmployeeService
 ) {
 
+    @Operation(summary = "Create Employee")
     @PostMapping
     suspend fun create(@Valid @RequestBody employeeRequest: CreateEmployeeRequest): ResponseEntity<EmployeeResponse> {
         val savedEmployee = employeeService.upsert(employeeRequest.toEmployee())
@@ -34,18 +39,21 @@ class EmployeeApiController(
             .body(EmployeeResponse.fromEmployee(savedEmployee))
     }
 
+    @Operation(summary = "Get Employee")
     @GetMapping("/{id}")
     suspend fun get(@PathVariable id: Int): ResponseEntity<EmployeeResponse> {
         val fetchedEmployee = employeeService.get(id)
         return ResponseEntity.ok(EmployeeResponse.fromEmployee(fetchedEmployee))
     }
 
+    @Operation(summary = "Update Employee")
     @PutMapping("/{id}")
     suspend fun update(@PathVariable id: Int, @Valid @RequestBody employeeRequest: UpdateEmployeeRequest): ResponseEntity<EmployeeResponse> {
         val updatedEmployee = employeeService.upsert(employeeRequest.toEmployee(id))
         return ResponseEntity.ok(EmployeeResponse.fromEmployee(updatedEmployee))
     }
 
+    @Operation(summary = "Delete Employee")
     @DeleteMapping("/{id}")
     suspend fun delete(@PathVariable id: Int): ResponseEntity<Unit> {
         employeeService.delete(id)
@@ -71,6 +79,7 @@ class EmployeeApiControllerErrorHandling {
     }
 }
 
+@Schema(name = "Create Employee Request")
 data class CreateEmployeeRequest(
     @field:Size(min = 1, max = Employee.MAX_LENGTH_FIRST_NAME) val firstName: String,
     @field:Size(min = 1, max = Employee.MAX_LENGTH_LAST_NAME) val lastName: String,
@@ -84,6 +93,7 @@ data class CreateEmployeeRequest(
     )
 }
 
+@Schema(name = "Update Employee Request")
 data class UpdateEmployeeRequest(
     @field:Size(min = 1, max = Employee.MAX_LENGTH_FIRST_NAME) val firstName: String,
     @field:Size(min = 1, max = Employee.MAX_LENGTH_LAST_NAME) val lastName: String,
@@ -97,6 +107,7 @@ data class UpdateEmployeeRequest(
     )
 }
 
+@Schema(name = "Employee")
 data class EmployeeResponse(
     val id: Int,
     @field:Size(min = 1, max = Employee.MAX_LENGTH_FIRST_NAME) val firstName: String,

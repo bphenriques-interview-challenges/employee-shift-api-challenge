@@ -22,6 +22,8 @@ Dockerized:
 $ make run-dockerized
 ```
 
+Once running, you can check the partially documented API through `http://localhost:8080/swagger-ui.html` (disclaimer: I am lazy).
+
 ## Testing
 
 Full tests:

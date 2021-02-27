@@ -3,6 +3,9 @@ package com.bphenriques.employeeshifts.webapp.web
 import com.bphenriques.employeeshifts.domain.shift.model.Shift
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintViolationException
 import com.bphenriques.employeeshifts.domain.shift.service.ShiftService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
@@ -22,22 +25,26 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("shifts")
+@Tag(name = "Shifts", description = "Shifts API")
 class ShiftApiController(
     private val shiftService: ShiftService
 ) {
 
+    @Operation(summary = "Create or update Shifts")
     @PostMapping
     suspend fun upsert(@Valid @RequestBody shiftsRequests: Flow<UpsertShiftsRequest>): ResponseEntity<Flow<ShiftResponse>> {
         val savedShifts = shiftService.upsert(shiftsRequests.map { it.toShift() })
         return ResponseEntity.ok(savedShifts.map { ShiftResponse.fromShift(it) })
     }
 
+    @Operation(summary = "Find Shifts")
     @GetMapping("/find")
     suspend fun find(@RequestParam(name = "employee_ids") employeeIds: List<Int>): ResponseEntity<Flow<ShiftResponse>> {
         val fetchedShifts = shiftService.findByEmployeeIds(employeeIds.asFlow())
         return ResponseEntity.ok(fetchedShifts.map { ShiftResponse.fromShift(it) })
     }
 
+    @Operation(summary = "Delete Shifts")
     @DeleteMapping
     suspend fun delete(@RequestParam(name = "ids") ids: List<Int>): ResponseEntity<Unit> {
         shiftService.delete(ids.asFlow())
@@ -57,10 +64,18 @@ class ShiftApiControllerErrorHandling {
     }
 }
 
+@Schema(name = "Upsert Shifts Request")
 data class UpsertShiftsRequest(
+    @Schema(title = "The id of the shift. Omit if creating a new one.", nullable = true)
     val id: Int = 0, // When absent, assume that the user intends to create. Otherwise, update.
+
+    @Schema(title = "The id of an existing Employee.")
     val employeeId: Int,
+
+    @Schema(title = "Start of the shift in ISO-8601 format", example = "2020-01-01T12:00:00Z")
     val startShift: Instant,
+
+    @Schema(title = "End of the shift in ISO-8601 format", example = "2020-01-01T13:00:00Z")
     val endShift: Instant
 ) {
     fun toShift(): Shift = Shift(
@@ -71,6 +86,7 @@ data class UpsertShiftsRequest(
     )
 }
 
+@Schema(name = "Shift")
 data class ShiftResponse(
     val id: Int,
     val employeeId: Int,

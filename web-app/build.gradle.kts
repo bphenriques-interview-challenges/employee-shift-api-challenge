@@ -21,6 +21,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
+    // Auto-docs
+    implementation("org.springdoc:springdoc-openapi-webflux-ui:${AppVersion.SPRING_DOC_OPEN_API}")
+    implementation("org.springdoc:springdoc-openapi-kotlin:${AppVersion.SPRING_DOC_OPEN_API}")
+
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${AppVersion.COROUTINES}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${AppVersion.COROUTINES}")
