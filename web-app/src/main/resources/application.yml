@@ -16,7 +16,7 @@ management:
     health:
       probes.enabled: true
       group:
-        readiness.include: readinessState,diskSpace
+        readiness.include: readinessState,diskSpace,r2dbc
         liveness.include: livenessState,ping
       enabled: true
       show-details: ALWAYS
