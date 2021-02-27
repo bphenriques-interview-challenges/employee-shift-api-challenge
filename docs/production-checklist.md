@@ -7,6 +7,7 @@ Follows the set of tasks that needs to be done before going into production:
 - [ ] Review API Error responses.
 - [ ] Review if all unhappy paths are not leaking internal information.
 - [ ] Monitoring infrastructure (e.g., Grafana for Telemetry and Elastic stack for logging).
+- [ ] Proper setup of the Database: segregated users/roles and other sensible settings.
 
 After proper benchmarks (we need measurements before making any improvement):
 - [ ] Consider creating an index on the `shift` table over the start/end date times columns.

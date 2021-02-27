@@ -7,19 +7,27 @@ ROOT_DIR=$(shell pwd)
 test:
 	sh $(ROOT_DIR)/ci/test.sh
 
-.PHONY: run-dockerized
+.PHONE: build
+build:
+	docker build . --tag bphenriques/employee-shifts-api
+
+.PHONY: run
 run-dockerized:
 	docker-compose up --build run
 
 #
 # Local development
 #
-.PHONY: run
+.PHONY: run-local
 run:
 	docker-compose up -d postgres
 	echo "Waiting for dependencies to start..."
 	sleep 5
 	bash -c "trap 'docker-compose down' EXIT 1; env $(shell egrep -v '^#' $(ROOT_DIR)/environment.local.env | xargs) $(ROOT_DIR)/gradlew web-app:bootRun"
+
+.PHONE: build-local
+build-local:
+	$(ROOT_DIR)/gradlew build
 
 .PHONY: test-dependencies-up
 test-dependencies-up:

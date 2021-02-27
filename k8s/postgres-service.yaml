@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  type: NodePort # There are others: ClusterIP (internal within the cluster), NodePort (static port) and LoadBalancer (external)
+  ports:
+    - port: 5432
+  selector:
+    app: postgres

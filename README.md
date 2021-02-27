@@ -2,36 +2,49 @@
 
 The challenge description is available [here](docs/challenge.md).
 
-# Architecture
-
 The application explores the [Hexagonal](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)) architecture 
-using Spring-Boot's dependency injection.
+leveraging Spring-Boot's dependency injection. Moreover, the application is built around the Reactive principles using:
+- [Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html) as the HTTP interface.
+- [Spring Data R2DBC](https://spring.io/projects/spring-data-r2dbc) to interact with the databases.
+- [Flyway](https://flywaydb.org/) to automate migrations and because you likely won't have *direct* access to the DB in production.
+
+You may find some notes on production readiness [here](docs/production-checklist.md).
 
 # Development
 
 Requirements:
 - Java 11
 
-## Running
+## Building
+
+Docker image:
+```
+$ make build
+```
 
 Locally:
+```
+$ make build-local
+```
+
+## Running
+
+Dockerized:
 ```sh
 $ make run
 ```
 
-Dockerized:
+Locally:
 ```sh
-$ make run-dockerized
+$ make run-local
 ```
 
-The API-Docs are available at http://localhost:8080/swagger-ui.html.
+In any case, the API-Docs are available at http://localhost:8080/swagger-ui.html.
 
 There are three additional endpoints on port `8081` which is specific for monitoring:
-- *Liveness Probe*: localhost:8081/actuator/health/liveness
-- *Readiness Probe*: localhost:8081/actuator/health/readiness
-- *Prometheus Metrics*: localhost:8081/actuator/prometheus
-
-PS: I am lazy. I prefer automatic documentation. Is easier that manually writing.
+- **Liveness Probe**: localhost:8081/actuator/health/liveness
+- **Readiness Probe**: localhost:8081/actuator/health/readiness
+- **Prometheus Metrics**: localhost:8081/actuator/prometheus
 
 ## Testing
 
