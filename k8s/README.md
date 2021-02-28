@@ -12,7 +12,7 @@ target, however it does not take advantage of the health probes used in K8S.
 # Deploying
 
 Deploy everything:
-```
+```sh
 $ make deploy
 ```
 
@@ -39,22 +39,21 @@ $ kubectl logs -f employee-shifts-api-b46ff4745-jwl44
 
 # Tearing down
 Run the following command:
-```
+```sh
 $ make delete
 ```
 
-# Future work
-
-Once I get the hang of the foundations I would like to research [terraform](https://www.terraform.io/)
-which I started in branch `terraform` which avoids coordinating manually the deployments while allowing having the
-infrastructure explicit through code (and having immutable deployments).
-
 # Reference pages:
 
-Follows some links I found useful during this setup:
-- https://circleci.com/blog/learn-iac-part1/
-- https://www.terraform.io/intro/index.html
-- https://www.reddit.com/r/kubernetes/comments/i9l17t/helm_vs_terraform/  
-- https://blog.gruntwork.io/why-we-use-terraform-and-not-chef-puppet-ansible-saltstack-or-cloudformation-7989dad2865c
-- https://severalnines.com/database-blog/using-kubernetes-deploy-postgresql
-- https://stackoverflow.com/questions/58481850/no-matches-for-kind-deployment-in-version-extensions-v1beta1
+Follows some links I found useful:
+- Kubernetes concepts: https://kubernetes.io/docs/concepts/
+- Kubernetes 101: https://kubernetes.io/docs/concepts/overview/
+- Docker + Kubernetes: https://docs.docker.com/get-started/kube-deploy/
+- Deploy Postgres: https://severalnines.com/database-blog/using-kubernetes-deploy-postgresql
+- For manual operations when things to wrong: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+- Changing how the application is accessed externally:: https://kubernetes.io/docs/concepts/services-networking/ingress/
+- Rolling updates: https://www.bluematador.com/blog/kubernetes-deployments-rolling-update-configuration
+- Managing secrets: https://medium.com/@harsh.manvar111/kubernetes-secret-vs-vault-fb57d75ce553
+- Managing secrets using Hashi Vault: https://www.vaultproject.io/
+
+There are more links, I added in-line in some pages.

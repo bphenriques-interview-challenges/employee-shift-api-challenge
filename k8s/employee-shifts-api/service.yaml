@@ -17,7 +17,8 @@ spec:
     - name: probe
       protocol: TCP
       port: 8081        # Where other pods can contact
-      # The probes ports should be hidden as they are only useful for cluster orchestration. Enabling for demonstration.
+
+      # WARNING: For demonstration purposes the probes ports are visible. They should be hidden.
       targetPort: 8081  # Where the container receives requests
       nodePort: 30002   # Expose externally. However, it is possible to avoid this (research).
   type: NodePort

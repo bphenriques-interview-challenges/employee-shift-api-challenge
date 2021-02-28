@@ -19,7 +19,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: employee-shifts-api
-          image: bphenriques/employee-shifts-api:latest # TODO: Use fixed release reproducibility.
+          image: bphenriques/employee-shifts-api:latest # TODO: Use fixed release to ensure reproducibility.
           imagePullPolicy: IfNotPresent
           ports:
             - name: service

@@ -10,7 +10,8 @@ leveraging Spring-Boot's dependency injection. Moreover, the application is buil
 - [Spring Data R2DBC](https://spring.io/projects/spring-data-r2dbc) to interact with the databases.
 - [Flyway](https://flywaydb.org/) to automate migrations and because you likely won't have *direct* access to the DB in production.
 
-The project makes available a docker image that can be used to deploy on [Kubernetes](k8s/README.md).
+The project makes available a docker image that can be used to deploy on [Kubernetes](k8s/README.md) and it uses 
+[docker-compose](https://docs.docker.com/compose/) to run tests within local containers in the CI/CD pipelines.
 
 You may find some notes on production readiness [here](docs/production-checklist.md).
 
