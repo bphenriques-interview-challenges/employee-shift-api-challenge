@@ -6,6 +6,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: employee-shifts-api-config
+  namespace: default
   labels:
     app: employee-shifts-api
 data:

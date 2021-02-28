@@ -18,10 +18,10 @@ $ make deploy
 
 After the deployment is done, you can check the status of the existing pods:
 ```sh
-$ kubectl get pod
-NAME                                  READY   STATUS    RESTARTS   AGE
-employee-shifts-api-b46ff4745-jwl44   1/1     Running   0          13m
-postgres-7d76d9645c-f8qvj             1/1     Running   0          22m
+$ kubectl get deployments
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+employee-shifts-api   2/2     2            2           115s
+postgres              1/1     1            1           115s
 ```
 
 Once you see this the status `Running` and `READY` set to `1/1` you may use the API:

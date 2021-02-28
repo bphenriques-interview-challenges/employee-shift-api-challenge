@@ -1,0 +1,17 @@
+# https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+# https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: employee-shifts-api
+  namespace: default
+  labels:
+    app: employee-shifts-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: employee-shifts-api
+  minReplicas: 2  # At least two for high-availability.
+  maxReplicas: 3  # 3 if more are required.
+  targetCPUUtilizationPercentage: 70

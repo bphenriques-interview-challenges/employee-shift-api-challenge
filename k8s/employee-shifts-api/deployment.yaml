@@ -9,7 +9,6 @@ spec:
   selector:
     matchLabels:
       app: employee-shifts-api
-  replicas: 1
   template:
     metadata:
       name: employee-shifts-api

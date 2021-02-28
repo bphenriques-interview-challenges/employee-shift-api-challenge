@@ -24,14 +24,16 @@ status:
 .PHONY: deploy-employee-shifts-api
 deploy-employee-shifts-api:
 	kubectl create -f $(ROOT_DIR)/employee-shifts-api/configmap.yaml
+	kubectl create -f $(ROOT_DIR)/employee-shifts-api/autoscaler.yaml
 	kubectl create -f $(ROOT_DIR)/employee-shifts-api/deployment.yaml
 	kubectl create -f $(ROOT_DIR)/employee-shifts-api/service.yaml
 
 .PHONY: delete-employee-shifts-api
 delete-employee-shifts-api:
-	kubectl delete service employee-shifts-api-entrypoint
+	kubectl delete service employee-shifts-api
 	kubectl delete deployment employee-shifts-api
 	kubectl delete configmap employee-shifts-api-config
+	kubectl delete HorizontalPodAutoscaler employee-shifts-api
 
 .PHONY: deploy-postgres
 deploy-postgres:

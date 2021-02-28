@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: employee-shifts-api-entrypoint
+  name: employee-shifts-api
   namespace: default
   labels:
     app: employee-shifts-api
