@@ -13,10 +13,10 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    # Hmmm: We can likely point to another remote resource (e.g., Amazon RDS).
+    # Hmmm: Pointing locally but this should come from a remote resource.
     path: "/mnt/data"
 ---
-# Claim the storage
+# Claim the storage for postgres
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:

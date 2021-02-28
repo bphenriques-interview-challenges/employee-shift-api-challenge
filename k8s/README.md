@@ -1,14 +1,19 @@
 # Deployment to K8S
 
-I usually have this provided by SRE. Follows my first experiments with deploying Postgres manually. Most of this should
-be automated using [terraform](https://www.terraform.io/).
+Follows my experiment on deploying this manually in the local K8S cluster. This is usually provided by SRE so this is 
+good experiment. It is already possible to deploy the docker image in the root of the project using the `run` docker-compose
+target, however it does take advantage of the health probes used in K8S.
 
-Leveraging [terraform](https://www.terraform.io/) for server provisioning and immutable deployments.
+In the future, once I get the hang of the foundations I would like to research [terraform](https://www.terraform.io/)
+which I started in branch `terraform`. Similar to other projects and professional experience I look forward to
+having a way to have immutable deployments and having the infrastructure formalized through code.
+
+Last and not the least, one should have the server automated regardless of the environment (e.g., `staging`, `production`) or
+availability zone (e.g., `us-east1`).
 
 # Requirements
 
-1. Running local Kubernetes cluster. If you are using macOS follow this [guide](https://docs.docker.com/docker-for-mac/#kubernetes).
-2. [Terraform](https://www.terraform.io/) installed.
+A running local Kubernetes cluster. If you are using macOS follow this [guide](https://docs.docker.com/docker-for-mac/#kubernetes).
 
 # Deploying
 
@@ -16,19 +21,8 @@ Leveraging [terraform](https://www.terraform.io/) for server provisioning and im
 
 In the `postgres` folder:
 
-Load the plugins:
 ```
-$  terraform init 
-```
-
-Preview the changes:
-```sh
-$ terraform plan
-```
-
-Deploy the changes:
-```sh
-$ terraform apply
+$ make deploy-postgres
 ```
 
 After the deployment is done, you can check the running pods:
@@ -44,6 +38,7 @@ $ kubectl get svc <service> -o jsonpath='{.spec.ports[0].nodePort}'
 # Reference pages:
 
 Follows some links I found useful during this setup:
+- https://circleci.com/blog/learn-iac-part1/
 - https://www.terraform.io/intro/index.html
 - https://www.reddit.com/r/kubernetes/comments/i9l17t/helm_vs_terraform/  
 - https://blog.gruntwork.io/why-we-use-terraform-and-not-chef-puppet-ansible-saltstack-or-cloudformation-7989dad2865c
