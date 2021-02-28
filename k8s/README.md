@@ -2,14 +2,12 @@
 
 Follows my experiment on deploying this manually in the local K8S cluster. This is usually provided by SRE so this is 
 good experiment. It is already possible to deploy the docker image in the root of the project using the `run` docker-compose
-target, however it does take advantage of the health probes used in K8S.
-
-Last and not the least, one should have the server automated regardless of the environment (e.g., `staging`, `production`) or
-availability zone (e.g., `us-east1`).
+target, however it does not take advantage of the health probes used in K8S.
 
 # Requirements
 
-A running local Kubernetes cluster. If you are using macOS follow this [guide](https://docs.docker.com/docker-for-mac/#kubernetes).
+- A running local Kubernetes cluster. If you are using macOS follow this [guide](https://docs.docker.com/docker-for-mac/#kubernetes).
+- The docker image `bphenriques/employee-shifts-api:latest` but be present in your docker registry.
 
 # Deploying
 
@@ -18,14 +16,25 @@ Deploy everything:
 $ make deploy
 ```
 
-After the deployment is done, you can check the running pods:
+After the deployment is done, you can check the status of the existing pods:
 ```sh
 $ kubectl get pod
+NAME                                  READY   STATUS    RESTARTS   AGE
+employee-shifts-api-b46ff4745-jwl44   1/1     Running   0          13m
+postgres-7d76d9645c-f8qvj             1/1     Running   0          22m
 ```
 
-You can service port of the api:
+Once you see this the status `Running` and `READY` set to `1/1` you may use the API:
+- **Swagger UI**: http://localhost:30001/swagger-ui.html
+- **Readiness probe**: http://localhost:30002/actuator/health/readiness
+- **Liveness probe**: http://localhost:30002/actuator/health/liveness
+- **Prometheus scrape**: http://localhost:30002/actuator/prometheus
+
+Note: The port `30002` is exposed outside solely for demonstration purposes. It should be hidden in other environments.
+
+Do some requests and check the logs:
 ```sh
-$ kubectl get svc employee-shifts-api
+$ kubectl logs -f employee-shifts-api-b46ff4745-jwl44
 ```
 
 # Tearing down
@@ -33,8 +42,6 @@ Run the following command:
 ```
 $ make delete
 ```
-
-K8S can be moody and it 
 
 # Future work
 

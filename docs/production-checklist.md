@@ -2,12 +2,12 @@
 
 Follows the set of tasks that needs to be done before going into production:
 - [ ] Authentication and authorization.
-- [ ] CI/CD plus deployment Instructions. Dummy guide to avoid stress when things go wrong.
 - [ ] Remove/redact PII information from the logs.
+- [ ] CI/CD plus deployment instructions. Dummy guide to avoid stress when things go wrong.
 - [ ] Review API Error responses.
 - [ ] Review if all unhappy paths are not leaking internal information.
-- [ ] Monitoring infrastructure (e.g., Grafana for Telemetry and Elastic stack for logging).
 - [ ] Proper setup of the Database: segregated users/roles and other sensible settings.
+- [ ] Split the infrastructure between environments (and if applicable availability zones).
 
 After proper benchmarks (we need measurements before making any improvement):
 - [ ] Consider creating an index on the `shift` table over the start/end date times columns.
@@ -17,10 +17,11 @@ After proper benchmarks (we need measurements before making any improvement):
 # Tech Debt
 
 Non-functional requirements:
-- Unfortunately constraint validations errors opaque and is hard to provide helpful information to caller.
+- Monitoring infrastructure (e.g., Grafana for Telemetry and Elastic stack for logging).
+- Unfortunately constraint validations errors are opaque and is hard to provide helpful information to caller without manually parsing the String messages.
 - API-Docs are good enough atm for demonstration. I am lazy and dislike manual (architecture) documentation.
 - Structured logging to ease log filtering (e.g., by employee id).
-- The information will remain in the DB permanently for simplicity.
+- There is no data retention policy (for simplicity).
 
 Nice to have:
 - Distributed tracing between the HTTP client and the server requests. Eases debugging.
