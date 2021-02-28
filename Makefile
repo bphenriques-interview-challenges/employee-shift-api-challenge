@@ -7,9 +7,9 @@ ROOT_DIR=$(shell pwd)
 test:
 	sh $(ROOT_DIR)/ci/test.sh
 
-.PHONE: build
+.PHONY: build
 build:
-	docker build . --tag bphenriques/employee-shifts-api
+	docker build . --tag bphenriques/employee-shifts-api:latest --target PRD_IMAGE
 
 .PHONY: run
 run-dockerized:
