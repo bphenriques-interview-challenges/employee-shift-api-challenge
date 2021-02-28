@@ -12,14 +12,14 @@ build:
 	docker build . --tag bphenriques/employee-shifts-api:latest --target PRD_IMAGE
 
 .PHONY: run
-run-dockerized:
+run:
 	docker-compose up --build run
 
 #
 # Local development
 #
 .PHONY: run-local
-run:
+run-local:
 	docker-compose up -d postgres
 	echo "Waiting for dependencies to start..."
 	sleep 5
