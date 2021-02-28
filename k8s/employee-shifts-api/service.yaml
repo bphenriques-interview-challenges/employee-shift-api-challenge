@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: employee-shifts-api-entrypoint
+  namespace: default
+  labels:
+    app: employee-shifts-api
+spec:
+  selector:
+    app: employee-shifts-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080        # Where other pods can contact
+      targetPort: 8080  # Where the container receives requests
+      nodePort: 30001   # Expose externally. However, it is possible to avoid this (research).
+    - name: probe
+      protocol: TCP
+      port: 8081        # Where other pods can contact
+      # The probes ports should be hidden as they are only useful for cluster orchestration. Enabling for demonstration.
+      targetPort: 8081  # Where the container receives requests
+      nodePort: 30002   # Expose externally. However, it is possible to avoid this (research).
+  type: NodePort
+

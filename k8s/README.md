@@ -4,10 +4,6 @@ Follows my experiment on deploying this manually in the local K8S cluster. This 
 good experiment. It is already possible to deploy the docker image in the root of the project using the `run` docker-compose
 target, however it does take advantage of the health probes used in K8S.
 
-In the future, once I get the hang of the foundations I would like to research [terraform](https://www.terraform.io/)
-which I started in branch `terraform`. Similar to other projects and professional experience I look forward to
-having a way to have immutable deployments and having the infrastructure formalized through code.
-
 Last and not the least, one should have the server automated regardless of the environment (e.g., `staging`, `production`) or
 availability zone (e.g., `us-east1`).
 
@@ -17,12 +13,9 @@ A running local Kubernetes cluster. If you are using macOS follow this [guide](h
 
 # Deploying
 
-## Postgres
-
-In the `postgres` folder:
-
+Deploy everything:
 ```
-$ make deploy-postgres
+$ make deploy
 ```
 
 After the deployment is done, you can check the running pods:
@@ -30,10 +23,24 @@ After the deployment is done, you can check the running pods:
 $ kubectl get pod
 ```
 
-And then check the service port:
+You can service port of the api:
 ```sh
-$ kubectl get svc <service> -o jsonpath='{.spec.ports[0].nodePort}'
+$ kubectl get svc employee-shifts-api
 ```
+
+# Tearing down
+Run the following command:
+```
+$ make delete
+```
+
+K8S can be moody and it 
+
+# Future work
+
+Once I get the hang of the foundations I would like to research [terraform](https://www.terraform.io/)
+which I started in branch `terraform` which avoids coordinating manually the deployments while allowing having the
+infrastructure explicit through code (and having immutable deployments).
 
 # Reference pages:
 

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: employee-shifts-api
+  namespace: default
+  labels:
+    app: employee-shifts-api
+spec:
+  selector:
+    matchLabels:
+      app: employee-shifts-api
+  replicas: 1
+  template:
+    metadata:
+      name: employee-shifts-api
+      namespace: default
+      labels:
+        app: employee-shifts-api
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: employee-shifts-api
+          image: bphenriques/employee-shifts-api:latest # TODO: Use fixed release reproducibility.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: service
+              containerPort: 8080
+            - name: probe
+              containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: employee-shifts-api-config
+          command: [ 'java', '-XX:+UseG1GC', '-verbose:gc', '-XX:+CrashOnOutOfMemoryError', '-Xmx512m', '-Xms512m' ]
+          args: [ '-jar', 'employee-shift-api.jar' ]
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: probe
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: probe
+            initialDelaySeconds: 50
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "1024Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1024Mi"

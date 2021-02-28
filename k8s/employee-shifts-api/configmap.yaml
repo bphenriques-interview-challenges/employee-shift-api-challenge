@@ -1,0 +1,18 @@
+# This file will potentially have secrets and will vary per environment!
+# Therefore, this should leverage a Secret storage service.
+# Food for thought: https://medium.com/@harsh.manvar111/kubernetes-secret-vs-vault-fb57d75ce553
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: employee-shifts-api-config
+  labels:
+    app: employee-shifts-api
+data:
+  LOGGING_LEVEL_COM_BPHENRIQUES: INFO
+  SPRING_PROFILES_ACTIVE: STG
+  SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/postgresdb
+  SPRING_R2DBC_USERNAME: postgresadmin
+  SPRING_R2DBC_PASSWORD: admin123
+  SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/postgresdb
+  SPRING_FLYWAY_LOCATIONS: filesystem:/app/db/migration
