@@ -9,14 +9,14 @@ delete: delete-employee-shifts-api delete-postgres
 # Useful: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 .PHONY: status
 status:
-	# Check deployed applications
-	kubectl get deployments
-
-	# List pods
-	kubectl get pods
-
-	# Check Port with
-	kubectl get svc postgres employee-shifts-api-entrypoint
+	# Deployments
+	@kubectl get deployments
+	@echo
+	# Pods
+	@kubectl get pods
+	@echo
+	# Services
+	@kubectl get svc postgres employee-shifts-api
 
 #
 # Auxiliary Targets
