@@ -23,7 +23,7 @@ class EmployeeRepository(
     override suspend fun upsert(employee: Employee): Employee {
         try {
             val upsertedEmployee = rawEmployeeRepository.save(employee.toEmployeeRow())
-            logger.info("[UPSERT] Upserted $upsertedEmployee") // Remove PII.
+            logger.info("[UPSERT] Upserted $upsertedEmployee")
             return upsertedEmployee.toEmployee()
         } catch (ex: DataIntegrityViolationException) {
             logger.warn("[ERROR] Constraint violation when upserting employee ($employee): ${ex.message}", ex)
