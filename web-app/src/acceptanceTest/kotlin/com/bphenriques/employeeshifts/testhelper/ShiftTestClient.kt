@@ -15,14 +15,11 @@ class ShiftTestClient(
 ) {
 
     fun upsertShifts(shifts: List<Shift>): WebTestClient.ResponseSpec =
-        upsertShifts(JsonFixture.upsertShiftsRequest(shifts))
-
-    fun upsertShifts(rawJson: String): WebTestClient.ResponseSpec =
         webTestClient.post()
             .uri("/shifts")
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(rawJson)
+            .bodyValue(JsonFixture.upsertShiftsRequest(shifts))
             .exchange()
 
     fun findShiftsByEmployeeId(employeeIds: List<Int>): WebTestClient.ResponseSpec =

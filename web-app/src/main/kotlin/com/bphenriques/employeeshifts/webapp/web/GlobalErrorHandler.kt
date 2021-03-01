@@ -25,7 +25,7 @@ class GlobalErrorHandler {
 
     @ExceptionHandler(ServerWebInputException::class)
     fun handleServerWebInputException(ex: ServerWebInputException): ResponseEntity<ErrorResponse> {
-        logger.warn(ex.message, ex)
+        logger.warn(ex.message)
         return ApiError.BAD_REQUEST.toResponseEntity()
     }
 }

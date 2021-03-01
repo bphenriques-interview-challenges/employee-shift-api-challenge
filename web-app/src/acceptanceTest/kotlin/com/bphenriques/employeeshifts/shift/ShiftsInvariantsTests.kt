@@ -95,47 +95,6 @@ class ShiftsInvariantsTests {
     }
 
     @Test
-    fun `It takes into account the timezone`() {
-        val employee = createEmployee(newEmployee())
-
-        // Times are different but are in the different time zones leading to conflict.
-        shiftTestClient.upsertShifts(
-            """
-            [
-                {
-                    "employee_id": ${employee.id},
-                    "start_shift": "2021-02-27T12:00:00+00:00",
-                    "end_shift": "2021-02-27T13:00:00+00:00"
-                },
-                {
-                    "employee_id": ${employee.id},
-                    "start_shift": "2021-02-27T13:00:00+01:00",
-                    "end_shift": "2021-02-27T14:00:00+01:00"
-                }
-            ]
-            """.trimIndent()
-        ).expectStatus().isBadRequest
-
-        // Times are the same but the timezone is not. Compatible shifts.
-        shiftTestClient.upsertShifts(
-            """
-            [
-                {
-                    "employee_id": ${employee.id},
-                    "start_shift": "2021-02-27T12:00:00+00:00",
-                    "end_shift": "2021-02-27T13:00:00+00:00"
-                },
-                {
-                    "employee_id": ${employee.id},
-                    "start_shift": "2021-02-27T12:00:00+01:00",
-                    "end_shift": "2021-02-27T13:00:00+01:00"
-                }
-            ]
-            """.trimIndent()
-        ).expectStatus().isOk
-    }
-
-    @Test
     fun `When a shift in the batch is invalid, all the shifts are rejected`() {
         val employee = createEmployee(newEmployee())
         val validShift = newShift().copy(employeeId = employee.id, startShift = now, endShift = now.plus(30, ChronoUnit.MINUTES))

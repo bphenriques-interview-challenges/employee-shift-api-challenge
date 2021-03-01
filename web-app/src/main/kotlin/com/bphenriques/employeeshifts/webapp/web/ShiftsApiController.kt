@@ -72,10 +72,10 @@ data class UpsertShiftsRequest(
     @Schema(title = "The id of an existing Employee.")
     val employeeId: Int,
 
-    @Schema(title = "Start of the shift in ISO-8601 format", example = "2020-01-01T12:00:00Z")
+    @Schema(title = "Start of the shift in ISO-8601 format in UTC", example = "2020-01-01T12:00:00Z")
     val startShift: Instant,
 
-    @Schema(title = "End of the shift in ISO-8601 format", example = "2020-01-01T13:00:00Z")
+    @Schema(title = "End of the shift in ISO-8601 format in UTC", example = "2020-01-01T13:00:00Z")
     val endShift: Instant
 ) {
     fun toShift(): Shift = Shift(

@@ -46,6 +46,10 @@ class ShiftRepository(
                     logger.warn("[UPSERT] Error: Constraint violation when upserting shifts: ${ex.message}", ex)
                     throw ShiftConstraintViolationException(shifts.toList(), ex)
                 }
+                else -> {
+                    logger.error("Unexpected error encountered: $ex", ex)
+                    throw ex
+                }
             }
         }
 
