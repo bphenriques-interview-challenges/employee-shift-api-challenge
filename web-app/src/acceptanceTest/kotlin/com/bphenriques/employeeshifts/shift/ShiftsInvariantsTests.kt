@@ -4,9 +4,9 @@ import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.testhelper.EmployeeTestClient
 import com.bphenriques.employeeshifts.testhelper.SQLUtil
 import com.bphenriques.employeeshifts.testhelper.ShiftTestClient
-import com.bphenriques.test.Generator
 import com.bphenriques.test.Generator.newEmployee
 import com.bphenriques.test.Generator.newShift
+import com.bphenriques.test.Generator.randomInt
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -97,7 +97,7 @@ class ShiftsInvariantsTests {
 
     @Test
     fun `It returns NOT_FOUND (404) when the employee does not exist`() {
-        val shift = newShift().copy(employeeId = Generator.randomInt(), startShift = now, endShift = now.plus(1, ChronoUnit.MINUTES))
+        val shift = newShift().copy(employeeId = randomInt(), startShift = now, endShift = now.plus(1, ChronoUnit.MINUTES))
 
         shiftTestClient.upsertShifts(listOf(shift)).expectStatus().isNotFound
     }

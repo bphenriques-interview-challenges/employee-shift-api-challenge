@@ -34,6 +34,7 @@ EXPOSE 8080
 EXPOSE 8081
 
 # Build PRD image with the binaries only.
+# The image can further slimified if we use the JRE (runtime) instead which is better.
 FROM adoptopenjdk/openjdk11:debian-slim as PRD_IMAGE
 WORKDIR /app
 

@@ -17,7 +17,7 @@ class ShiftService(
          * Moreover this also avoids client-facing issues where client may send multiple shifts within the same minute
          * and having all of them accepted when they shouldn't be.
          *
-         * Normalizing here, allows having a more flexible external contract.
+         * Normalizing also allows having a more flexible external contract.
          */
         val shiftsPrecisionToMinute = shifts.map {
             it.copy(

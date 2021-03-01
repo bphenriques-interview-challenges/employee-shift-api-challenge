@@ -19,7 +19,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: employee-shifts-api
-          image: bphenriques/employee-shifts-api:latest # TODO: Use fixed release to ensure reproducibility.
+          image: bphenriques/employee-shifts-api:0.9.0 # Use fixed version to ensure reproducibility.
           imagePullPolicy: IfNotPresent
           ports:
             - name: service
@@ -29,7 +29,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: employee-shifts-api-config
-          command: [ 'java', '-XX:+UseG1GC', '-verbose:gc', '-XX:+CrashOnOutOfMemoryError', '-Xmx512m', '-Xms512m' ]
+          command: [ 'java', '-verbose:gc', '-XX:+CrashOnOutOfMemoryError', '-Xmx512m', '-Xms512m' ]
           args: [ '-jar', 'employee-shift-api.jar' ]
           livenessProbe:
             httpGet:

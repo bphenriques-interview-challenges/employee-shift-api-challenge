@@ -26,7 +26,7 @@ services:
     image: bphenriques/employee-shift-api
     env_file:
       - environment.docker.env
-    command: java -XX:+UseG1GC -XX:+CrashOnOutOfMemoryError -Xmx512m -Xms512m -jar employee-shift-api.jar
+    command: java -verbose:gc -XX:+CrashOnOutOfMemoryError -Xmx512m -Xms512m -jar employee-shift-api.jar
     depends_on:
       - postgres
 

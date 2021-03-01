@@ -9,7 +9,7 @@ test:
 
 .PHONY: build
 build:
-	docker build . --tag bphenriques/employee-shifts-api:latest --target PRD_IMAGE
+	docker build . --tag bphenriques/employee-shifts-api:latest --tag bphenriques/employee-shifts-api:0.9.0 --target PRD_IMAGE
 
 .PHONY: run
 run:

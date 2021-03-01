@@ -6,6 +6,7 @@ import com.bphenriques.employeeshifts.domain.employee.model.EmployeeFieldsTooLar
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeNotFoundException
 import com.bphenriques.employeeshifts.testhelper.sql.SQLUtil
 import com.bphenriques.employeeshifts.testhelper.sql.employee
+import com.bphenriques.test.Generator.newEmployee
 import com.bphenriques.test.Generator.randomInt
 import com.bphenriques.test.Generator.stringOfLength
 import com.bphenriques.test.Generator.uuid
@@ -38,12 +39,7 @@ class EmployeeRepositoryTest {
 
     @Test
     fun `upsert - It saves new entities`() = runBlocking {
-        val employee = Employee(
-            id = 0,
-            firstName = uuid(),
-            lastName = uuid(),
-            address = uuid()
-        )
+        val employee = newEmployee()
 
         val result = subject.upsert(employee)
 
@@ -54,12 +50,7 @@ class EmployeeRepositoryTest {
 
     @Test
     fun `upsert - It updates entities`() = runBlocking {
-        val employee = Employee(
-            id = 0,
-            firstName = uuid(),
-            lastName = uuid(),
-            address = uuid()
-        )
+        val employee = newEmployee()
         val inserted = subject.upsert(employee)
         val numberRows = SQLUtil.employee(jdbcTemplate).count()
         Assertions.assertEquals(1, numberRows)
@@ -73,12 +64,7 @@ class EmployeeRepositoryTest {
 
     @Test
     fun `upsert - It throws EmployeeConstraintAlreadyInUseException if the address is already in use`() = runBlocking {
-        val employee = Employee(
-            id = 0,
-            firstName = uuid(),
-            lastName = uuid(),
-            address = uuid()
-        )
+        val employee = newEmployee()
         subject.upsert(employee)
         Assertions.assertEquals(1, SQLUtil.employee(jdbcTemplate).count())
         val conflictingEmployee = Employee(
@@ -92,7 +78,6 @@ class EmployeeRepositoryTest {
             subject.upsert(conflictingEmployee)
         }
         Assertions.assertEquals(ex.employee, conflictingEmployee)
-        // Database state remains the same
         Assertions.assertEquals(1, SQLUtil.employee(jdbcTemplate).count())
     }
 
@@ -125,12 +110,7 @@ class EmployeeRepositoryTest {
 
     @Test
     fun `get - It obtains the entity`() = runBlocking {
-        val employee = Employee(
-            id = 0,
-            firstName = uuid(),
-            lastName = uuid(),
-            address = uuid()
-        )
+        val employee = newEmployee()
         val savedEntity = subject.upsert(employee)
 
         val loadedEntity = subject.get(savedEntity.id)
@@ -150,12 +130,7 @@ class EmployeeRepositoryTest {
 
     @Test
     fun `delete - It deletes the entity`() = runBlocking {
-        val employee = Employee(
-            id = 0,
-            firstName = uuid(),
-            lastName = uuid(),
-            address = uuid()
-        )
+        val employee = newEmployee()
         val savedEntity = subject.upsert(employee)
         Assertions.assertEquals(1, SQLUtil.employee(jdbcTemplate).count())
 

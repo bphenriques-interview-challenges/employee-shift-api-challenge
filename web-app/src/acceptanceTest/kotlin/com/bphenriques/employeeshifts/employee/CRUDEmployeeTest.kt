@@ -2,8 +2,8 @@ package com.bphenriques.employeeshifts.employee
 
 import com.bphenriques.employeeshifts.testhelper.EmployeeTestClient
 import com.bphenriques.employeeshifts.testhelper.SQLUtil
-import com.bphenriques.test.Generator
 import com.bphenriques.test.Generator.newEmployee
+import com.bphenriques.test.Generator.randomInt
 import com.bphenriques.test.Generator.uuid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -90,7 +90,7 @@ class CRUDEmployeeTest {
 
     @Test
     fun `GET employee id - It returns 404 when the employee does not exist`() {
-        val employeeId = Generator.randomInt()
+        val employeeId = randomInt()
 
         employeeTestClient.getEmployee(employeeId).expectStatus().isNotFound
     }

@@ -1,13 +1,11 @@
 # Deployment to K8S
 
-Follows my experiment on deploying this manually in the local K8S cluster. This is usually provided by SRE so this is 
-good experiment. It is already possible to deploy the docker image in the root of the project using the `run` docker-compose
-target, however it does not take advantage of the health probes used in K8S.
+Follows a guide on how to deploy the application on a local Kubernetes cluster.
 
 # Requirements
 
 - A running local Kubernetes cluster. If you are using macOS follow this [guide](https://docs.docker.com/docker-for-mac/#kubernetes).
-- The docker image `bphenriques/employee-shifts-api:latest` but be present in your docker registry.
+- The docker image `bphenriques/employee-shifts-api:0.9.0` but be present in your docker registry.
 
 # Deploying
 
@@ -24,8 +22,8 @@ employee-shifts-api   2/2     2            2           115s
 postgres              1/1     1            1           115s
 ```
 
-Once you see this the status `Running` and `READY` set to `1/1` you may use the API:
-- **Swagger UI**: http://localhost:30001/swagger-ui.html
+Once you see this the status `Running` and `READY` set to `2/2` you may use the API:
+- **API-Docs**: http://localhost:30001/swagger-ui.html
 - **Readiness probe**: http://localhost:30002/actuator/health/readiness
 - **Liveness probe**: http://localhost:30002/actuator/health/liveness
 - **Prometheus scrape**: http://localhost:30002/actuator/prometheus
@@ -37,11 +35,18 @@ Do some requests and check the logs:
 $ kubectl logs -f employee-shifts-api-b46ff4745-jwl44
 ```
 
-# Tearing down
-Run the following command:
+Once done, use the following command to tear everything down:
 ```sh
 $ make delete
 ```
+
+# Future Work
+
+This folder serves as Kubernetes deployment proof-of-concept. There is lots of things that should be improved:
+- Rolling Updates.
+- Secrets management.
+- Security (Postgres specially).
+- Isolation
 
 # Reference pages:
 
@@ -56,4 +61,4 @@ Follows some links I found useful:
 - Managing secrets: https://medium.com/@harsh.manvar111/kubernetes-secret-vs-vault-fb57d75ce553
 - Managing secrets using Hashi Vault: https://www.vaultproject.io/
 
-There are more links, I added in-line in some pages.
+There are more links, I added in-line in some files.

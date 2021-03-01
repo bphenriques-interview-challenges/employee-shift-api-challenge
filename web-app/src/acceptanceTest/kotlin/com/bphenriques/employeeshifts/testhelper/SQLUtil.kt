@@ -14,8 +14,6 @@ class EmployeeTableUtil(private val jdbcTemplate: JdbcTemplate) {
     fun clear() {
         jdbcTemplate.execute("DELETE FROM employee;")
     }
-
-    fun count(): Int = jdbcTemplate.queryForObject("SELECT COUNT (*) FROM employee;", Int::class.java) ?: error("Unexpected failed result")
 }
 
 class ShiftTableUtil(private val jdbcTemplate: JdbcTemplate) {
@@ -23,8 +21,6 @@ class ShiftTableUtil(private val jdbcTemplate: JdbcTemplate) {
     fun clear() {
         jdbcTemplate.execute("DELETE FROM shift;")
     }
-
-    fun count(): Int = jdbcTemplate.queryForObject("SELECT COUNT (*) FROM shift;", Int::class.java) ?: error("Unexpected failed result")
 }
 
 // Accessors for API convenience and scope.

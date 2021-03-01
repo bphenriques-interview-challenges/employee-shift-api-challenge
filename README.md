@@ -7,11 +7,11 @@ The challenge description is available [here](docs/challenge.md).
 ---
 
 The application explores the [Hexagonal](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)) architecture 
-leveraging Spring-Boot's dependency injection.
+leveraging Spring-Boot's dependency injection and [Spring Data](https://docs.spring.io/spring-data/jdbc/docs/current/reference/html/).
 
-The application makes available a docker image that can be used to deploy on, for example, [Kubernetes](k8s/README.md).
+The is a `Dockerfile` available that can be used to build a docker image deployable on, for example, [Kubernetes](k8s/README.md).
 
-You may find some notes on production readiness [here](docs/production-checklist.md).
+You may find some notes on production readiness under [docs/production-checklist.md](docs/production-checklist.md).
 
 # Development
 
@@ -34,12 +34,12 @@ $ make build-local
 
 ### Kubernetes
 
-Create if absent the `bphenriques/employee-shifts-api:latest` docker image:
+Create if absent the docker images:
 ```sh
 $ make build
 ```
 
-Then follow the k8s guide [k8s/README.md](k8s/README.md).
+Then follow the k8s guide at [k8s/README.md](k8s/README.md).
 
 ### Docker-Compose
 
@@ -47,7 +47,7 @@ Then follow the k8s guide [k8s/README.md](k8s/README.md).
 $ make run
 ```
 
-#### Locally
+### Locally
 
 ```sh
 $ make run-local
@@ -55,10 +55,13 @@ $ make run-local
 
 ## What is available
 
-The API-Docs are available at http://localhost:8080/swagger-ui.html and there are three additional endpoints on port `8081` which are specific for monitoring:
-- **Liveness Probe**: localhost:8081/actuator/health/liveness
-- **Readiness Probe**: localhost:8081/actuator/health/readiness
-- **Prometheus Metrics**: localhost:8081/actuator/prometheus
+Application:
+- **API-Docs**: http://localhost:8080/swagger-ui.html.
+
+Management:
+- **Liveness Probe**: http://localhost:8081/actuator/health/liveness
+- **Readiness Probe**: http://localhost:8081/actuator/health/readiness
+- **Prometheus Metrics**: http://localhost:8081/actuator/prometheus
 
 **Note**: Kubernetes uses different ports. See the guide [there](k8s/README.md) to see which ports it uses.
 
@@ -98,3 +101,4 @@ $ make format
 * `docs`: Relevant documentation.
 * `ci`: Continuous integrations scripts.
 * `buildSrc` and `gradle`: Relevant folders to build the project itself.
+* `k8`: Folder demonstrating how to deploy the application on K8S.
