@@ -1,13 +1,7 @@
-spring.profiles.active: dev
+spring.profiles.active: test
 spring.application.name: employee-shift-api
 
-# Flyway is not yet fully compatible with R2DBC.
-# See: https://stackoverflow.com/questions/59553647/how-to-run-flyway-migration-for-reactive-r2dbc-driver-on-sprintboot-stratup
-spring:
-  flyway:
-    user: ${spring.r2dbc.username}
-    password: ${spring.r2dbc.password}
-    baselineOnMigrate: true
+spring.flyway.baselineOnMigrate: true
 
 ---
 

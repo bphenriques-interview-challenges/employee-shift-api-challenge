@@ -11,9 +11,8 @@ metadata:
     app: employee-shifts-api
 data:
   LOGGING_LEVEL_COM_BPHENRIQUES: INFO
-  SPRING_PROFILES_ACTIVE: STG
-  SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/postgresdb
-  SPRING_R2DBC_USERNAME: postgresadmin
-  SPRING_R2DBC_PASSWORD: admin123
-  SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/postgresdb
+  SPRING_PROFILES_ACTIVE: stg
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgresdb
+  SPRING_DATASOURCE_USERNAME: postgresadmin
+  SPRING_DATASOURCE_PASSWORD: admin123
   SPRING_FLYWAY_LOCATIONS: filesystem:/app/db/migration

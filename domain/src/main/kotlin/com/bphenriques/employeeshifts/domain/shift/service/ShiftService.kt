@@ -2,8 +2,6 @@ package com.bphenriques.employeeshifts.domain.shift.service
 
 import com.bphenriques.employeeshifts.domain.shift.model.Shift
 import com.bphenriques.employeeshifts.domain.shift.repository.DomainShiftRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import org.springframework.stereotype.Service
 import java.time.temporal.ChronoUnit
 
@@ -12,7 +10,7 @@ class ShiftService(
     private val repository: DomainShiftRepository
 ) {
 
-    suspend fun upsert(shifts: Flow<Shift>): Flow<Shift> {
+    suspend fun upsert(shifts: List<Shift>): List<Shift> {
         /**
          * Given the business context, shifts do not require precision greater than minute.
          *
@@ -30,11 +28,11 @@ class ShiftService(
         return repository.upsert(shiftsPrecisionToMinute)
     }
 
-    suspend fun delete(ids: Flow<Int>) {
-        repository.delete(ids)
+    suspend fun findByEmployeeIds(employeeIds: List<Int>): List<Shift> {
+        return repository.findByEmployeeIds(employeeIds)
     }
 
-    suspend fun findByEmployeeIds(employeeIds: Flow<Int>): Flow<Shift> {
-        return repository.findByEmployeeIds(employeeIds)
+    suspend fun delete(ids: List<Int>) {
+        repository.delete(ids)
     }
 }

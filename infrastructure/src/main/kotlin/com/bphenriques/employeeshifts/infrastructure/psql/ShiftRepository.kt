@@ -4,25 +4,25 @@ import com.bphenriques.employeeshifts.domain.shift.model.Shift
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEmployeeNotFoundException
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEndBeforeOrAtStartException
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintOverlappingShiftsException
-import com.bphenriques.employeeshifts.domain.shift.model.UnexpectedUnmappedConstraintViolation
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftUnmappedFailedOperation
 import com.bphenriques.employeeshifts.domain.shift.repository.DomainShiftRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
-import org.springframework.dao.DataIntegrityViolationException
-import org.springframework.data.r2dbc.repository.Query
-import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import org.springframework.data.jdbc.repository.query.Modifying
+import org.springframework.data.jdbc.repository.query.Query
+import org.springframework.data.relational.core.conversion.DbActionExecutionException
+import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
-interface RawShiftRepository : CoroutineCrudRepository<ShiftRow, Int> {
+interface RawShiftRepository : CrudRepository<ShiftRow, Int> {
 
     @Query("SELECT * FROM shift s WHERE s.employee_id IN (:ids)")
-    fun findAllByEmployeeIds(@Param("ids") employeeIds: List<Int>): Flow<ShiftRow>
+    fun findAllByEmployeeIds(@Param("ids") employeeIds: List<Int>): List<ShiftRow>
+
+    @Modifying
+    @Query("DELETE FROM shift s WHERE s.id IN (:ids)")
+    fun deleteAllById(@Param("ids") ids: List<Int>)
 }
 
 @Repository
@@ -33,54 +33,54 @@ class ShiftRepository(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
-     * All or nothing operation. Otherwise, it will return the entries that were upserted successfully.
+     * Future work: Perform this operations in configurable batches.
      */
     @Transactional
-    override suspend fun upsert(shifts: Flow<Shift>): Flow<Shift> = rawShiftRepository
-        .saveAll(shifts.map { it.toShiftRow() })
-        .map {
-            val result = it.toShift()
-            logger.info("[UPSERT] Upserted $result")
-            result
-        }
-        .catch { ex ->
-            when (ex) {
-                is DataIntegrityViolationException -> {
-                    logger.warn("[UPSERT] Error: Constraint violation when upserting shifts: ${ex.message}", ex)
-                    val message = ex.message
-                    when {
-                        // Ideally DataIntegrityViolationException provide directly the constraint being violated.
-                        message == null -> error("Data Integrity violation but lack of message which is unexpected.")
-                        message.contains("start_shift_after_end_shift") -> throw ShiftConstraintEndBeforeOrAtStartException(shifts.toList(), ex)
-                        message.contains("employee_non_overlapping_shifts") -> throw ShiftConstraintOverlappingShiftsException(shifts.toList(), ex)
-                        message.contains("fk_employee") -> throw ShiftConstraintEmployeeNotFoundException(shifts.toList(), ex)
-                        else -> throw UnexpectedUnmappedConstraintViolation(shifts.toList(), ex)
+    override suspend fun upsert(shifts: List<Shift>): List<Shift> =
+        if (shifts.isEmpty()) {
+            emptyList()
+        } else {
+            try {
+                rawShiftRepository
+                    .saveAll(shifts.map { it.toShiftRow() })
+                    .map {
+                        val result = it.toShift()
+                        logger.info("[UPSERT SHIFT] Upserted $result")
+                        result
                     }
+            } catch (ex: DbActionExecutionException) {
+                logger.warn("[UPSERT SHIFT] Error: Failed to perform action in the DB: ${ex.message}", ex)
+                val message = ex.cause?.message
+                when {
+                    // Ideally DbActionExecutionException provide directly the constraint being violated.
+                    message == null -> error("[SHIFT] Data Integrity violation but lack of message which is unexpected.")
+                    message.contains("start_shift_after_end_shift") -> throw ShiftConstraintEndBeforeOrAtStartException(shifts.toList(), ex)
+                    message.contains("employee_non_overlapping_shifts") -> throw ShiftConstraintOverlappingShiftsException(shifts.toList(), ex)
+                    message.contains("fk_employee") -> throw ShiftConstraintEmployeeNotFoundException(shifts.toList(), ex)
+                    else -> throw ShiftUnmappedFailedOperation(shifts.toList(), ex)
                 }
             }
         }
 
-    suspend fun get(ids: Flow<Int>): Flow<Shift> =
-        rawShiftRepository.findAllById(ids).map { it.toShift() }
-
-    override suspend fun findByEmployeeIds(employeeIds: Flow<Int>): Flow<Shift> {
-        // @Query binding methods do not support Flow<*> and IN does not work with empty list.
-        val employeeIdsList = employeeIds.toList()
-        return if (employeeIdsList.isEmpty()) {
-            logger.trace("[FIND] Skipping due to empty collection provided")
-            emptyFlow()
+    suspend fun get(ids: List<Int>): List<Shift> =
+        if (ids.isEmpty()) {
+            emptyList()
         } else {
-            logger.debug("[FIND] $employeeIdsList")
-            rawShiftRepository.findAllByEmployeeIds(employeeIdsList).map { it.toShift() }
+            rawShiftRepository.findAllById(ids).map { it.toShift() }
         }
-    }
 
-    @Transactional
-    override suspend fun delete(ids: Flow<Int>) {
-        for (id in ids.toList()) {
-            rawShiftRepository.deleteById(id)
-            logger.info("[DELETE] Deleted $id")
+    override suspend fun findByEmployeeIds(employeeIds: List<Int>): List<Shift> =
+        if (employeeIds.isEmpty()) {
+            emptyList()
+        } else {
+            logger.debug("[FIND SHIFT] $employeeIds")
+            rawShiftRepository.findAllByEmployeeIds(employeeIds).map { it.toShift() }
         }
+
+    override suspend fun delete(ids: List<Int>) {
+        val idsList = ids.toList()
+        rawShiftRepository.deleteAllById(idsList)
+        logger.info("[DELETE SHIFT] Deleted $idsList")
     }
 
     private fun Shift.toShiftRow() = ShiftRow(

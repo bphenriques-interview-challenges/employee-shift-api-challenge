@@ -5,13 +5,9 @@ The challenge description is available [here](docs/challenge.md).
 ---
 
 The application explores the [Hexagonal](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)) architecture 
-leveraging Spring-Boot's dependency injection. Moreover, the application is built around the Reactive principles using:
-- [Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html) as the HTTP interface.
-- [Spring Data R2DBC](https://spring.io/projects/spring-data-r2dbc) to interact with the databases.
-- [Flyway](https://flywaydb.org/) to automate migrations and because you likely won't have *direct* access to the DB in production.
+leveraging Spring-Boot's dependency injection.
 
-The project makes available a docker image that can be used to deploy on [Kubernetes](k8s/README.md) and it uses 
-[docker-compose](https://docs.docker.com/compose/) to run tests within local containers in the CI/CD pipelines.
+The application makes available a docker image that can be used to deploy on, for example, [Kubernetes](k8s/README.md).
 
 You may find some notes on production readiness [here](docs/production-checklist.md).
 
@@ -64,7 +60,7 @@ The API-Docs are available at http://localhost:8080/swagger-ui.html and there ar
 
 ## Testing
 
-As it runs in the continuous-integration:
+As it runs in the continuous-integration leveraging local containers using [docker-compose](https://docs.docker.com/compose/):
 ```sh
 $ make test
 ```

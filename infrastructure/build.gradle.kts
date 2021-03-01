@@ -17,12 +17,9 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${AppVersion.COROUTINES}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${AppVersion.COROUTINES}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${AppVersion.COROUTINES}")
 
     // Persistence
-    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-    implementation("io.r2dbc:r2dbc-postgresql")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
 
@@ -32,7 +29,6 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine") // exclude junit4
         exclude(module = "mockito-core")
     }
-    testImplementation("io.projectreactor:reactor-test")
 }
 
 // Setup Integration Tests Target

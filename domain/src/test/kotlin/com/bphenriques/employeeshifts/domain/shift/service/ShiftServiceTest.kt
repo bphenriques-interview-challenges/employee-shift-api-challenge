@@ -10,10 +10,6 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -36,10 +32,10 @@ class ShiftServiceTest {
             )
         }
         val storedShifts = normalizedShifts.map { it.copy(id = randomInt()) }
-        val passedShiftsRepository = slot<Flow<Shift>>()
-        coEvery { repository.upsert(capture(passedShiftsRepository)) } returns storedShifts.asFlow()
+        val passedShiftsRepository = slot<List<Shift>>()
+        coEvery { repository.upsert(capture(passedShiftsRepository)) } returns storedShifts
 
-        val result = subject.upsert(shifts.asFlow())
+        val result = subject.upsert(shifts)
 
         Assertions.assertEquals(normalizedShifts, passedShiftsRepository.captured.toList())
         Assertions.assertEquals(storedShifts, result.toList())
@@ -50,10 +46,10 @@ class ShiftServiceTest {
     @Test
     fun `delete - It delegates the operation to the repository`() = runBlocking {
         val ids = listOf(randomInt(), randomInt(), randomInt())
-        val passedShiftsRepository = slot<Flow<Int>>()
+        val passedShiftsRepository = slot<List<Int>>()
         coJustRun { repository.delete(capture(passedShiftsRepository)) }
 
-        subject.delete(ids.asFlow())
+        subject.delete(ids)
 
         Assertions.assertEquals(ids, passedShiftsRepository.captured.toList())
         coVerify { repository.delete(any()) }
@@ -63,11 +59,11 @@ class ShiftServiceTest {
     @Test
     fun `findByEmployeeIds - It delegates the operation to the repository`() = runBlocking {
         val employeeIds = listOf(randomInt(), randomInt(), randomInt())
-        val storedShifts = flowOf(newShift(), newShift())
-        val passedShiftsRepository = slot<Flow<Int>>()
+        val storedShifts = listOf(newShift(), newShift())
+        val passedShiftsRepository = slot<List<Int>>()
         coEvery { repository.findByEmployeeIds(capture(passedShiftsRepository)) } returns storedShifts
 
-        val result = subject.findByEmployeeIds(employeeIds.asFlow())
+        val result = subject.findByEmployeeIds(employeeIds)
 
         Assertions.assertEquals(employeeIds, passedShiftsRepository.captured.toList())
         Assertions.assertEquals(storedShifts.toList(), result.toList())

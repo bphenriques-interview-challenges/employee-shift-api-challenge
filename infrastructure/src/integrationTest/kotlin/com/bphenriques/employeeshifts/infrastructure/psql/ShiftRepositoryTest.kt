@@ -5,20 +5,13 @@ import com.bphenriques.employeeshifts.domain.shift.model.Shift
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEmployeeNotFoundException
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEndBeforeOrAtStartException
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintOverlappingShiftsException
-import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintViolationException
-import com.bphenriques.employeeshifts.infrastructure.configuration.FlywayConfiguration
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftRowOperationException
 import com.bphenriques.employeeshifts.testhelper.sql.SQLUtil
 import com.bphenriques.employeeshifts.testhelper.sql.employee
 import com.bphenriques.employeeshifts.testhelper.sql.shift
 import com.bphenriques.test.Generator.newEmployee
 import com.bphenriques.test.Generator.newShift
 import com.bphenriques.test.Generator.randomInt
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -27,14 +20,14 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.r2dbc.core.DatabaseClient
+import org.springframework.jdbc.core.JdbcTemplate
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-@SpringBootTest
+@SpringBootTest(properties = ["logging.level.org=DEBUG"])
 class ShiftRepositoryTest {
 
-    @SpringBootApplication(scanBasePackageClasses = [EmployeeRepository::class, ShiftRepository::class, FlywayConfiguration::class])
+    @SpringBootApplication(scanBasePackageClasses = [EmployeeRepository::class, ShiftRepository::class])
     class App
 
     @Autowired
@@ -44,7 +37,7 @@ class ShiftRepositoryTest {
     private lateinit var employeeRepository: EmployeeRepository
 
     @Autowired
-    private lateinit var databaseClient: DatabaseClient
+    private lateinit var jdbcTemplate: JdbcTemplate
 
     private lateinit var employee1: Employee
     private lateinit var employee2: Employee
@@ -54,7 +47,7 @@ class ShiftRepositoryTest {
 
     @BeforeEach
     fun setup() {
-        SQLUtil.clearAll(databaseClient)
+        SQLUtil.clearAll(jdbcTemplate)
 
         employee1 = runBlocking { employeeRepository.upsert(newEmployee()) }
         employee2 = runBlocking { employeeRepository.upsert(newEmployee()) }
@@ -64,7 +57,7 @@ class ShiftRepositoryTest {
 
     @Test
     fun `upsert - It saves new entities`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee2.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
@@ -72,50 +65,50 @@ class ShiftRepositoryTest {
 
         val result = subject.upsert(shifts).toList()
 
-        Assertions.assertEquals(3, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(3, SQLUtil.shift(jdbcTemplate).count())
         Assertions.assertEquals(shifts.toSet(), result.map { it.copy(id = 0) }.toSet()) // The ids are not relevant in this test
     }
 
     @Test
     fun `upsert - It updates entities`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee2.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
         )
 
         val insertedShifts = subject.upsert(shifts).toList()
-        Assertions.assertEquals(3, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(3, SQLUtil.shift(jdbcTemplate).count())
 
-        val updatedShifts = subject.upsert(insertedShifts.map { it.copy(endShift = now.plusSeconds(120)) }.asFlow())
+        val updatedShifts = subject.upsert(insertedShifts.map { it.copy(endShift = now.plusSeconds(120)) })
         val storedUpdated = subject.get(updatedShifts.map { it.id }).toList()
         Assertions.assertEquals(updatedShifts.toSet(), storedUpdated.toSet())
     }
 
     @Test
     fun `upsert - It does nothing when it provides an empty flow`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee2.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
         )
         subject.upsert(shifts).toList()
-        Assertions.assertEquals(3, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(3, SQLUtil.shift(jdbcTemplate).count())
 
-        val result = subject.upsert(emptyFlow()).toList()
+        val result = subject.upsert(emptyList()).toList()
         Assertions.assertEquals(emptyList<Shift>(), result)
     }
 
     @Test
     fun `upsert - It accepts shifts one after another`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(1)),
             newShift().copy(employeeId = employee1.id, startShift = now.plusSeconds(2), endShift = now.plusSeconds(3)),
         )
 
         val result = subject.upsert(shifts).toList()
 
-        Assertions.assertEquals(2, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(2, SQLUtil.shift(jdbcTemplate).count())
         Assertions.assertEquals(shifts.toSet(), result.map { it.copy(id = 0) }.toSet()) // The ids are not relevant in this test
     }
 
@@ -128,7 +121,7 @@ class ShiftRepositoryTest {
 
         for (invalidShift in invalidShifts) {
             assertThrows<ShiftConstraintEndBeforeOrAtStartException> {
-                subject.upsert(flowOf(invalidShift)).toList()
+                subject.upsert(listOf(invalidShift)).toList()
             }
         }
     }
@@ -142,11 +135,11 @@ class ShiftRepositoryTest {
             newShift().copy(employeeId = employee1.id, startShift = now.plusSeconds(29), endShift = now.plusSeconds(31)), // right
         )
 
-        subject.upsert(flowOf(existingShift)).toList()
-        Assertions.assertEquals(1, SQLUtil.shift(databaseClient).count())
+        subject.upsert(listOf(existingShift)).toList()
+        Assertions.assertEquals(1, SQLUtil.shift(jdbcTemplate).count())
         for (invalidShift in invalidShifts) {
             assertThrows<ShiftConstraintOverlappingShiftsException> {
-                subject.upsert(flowOf(invalidShift)).toList()
+                subject.upsert(listOf(invalidShift)).toList()
             }
         }
     }
@@ -160,12 +153,12 @@ class ShiftRepositoryTest {
             newShift().copy(employeeId = employee4.id, startShift = now.plusSeconds(29), endShift = now.plusSeconds(31)), // right
         )
 
-        subject.upsert(flowOf(existingShift)).toList()
-        Assertions.assertEquals(1, SQLUtil.shift(databaseClient).count())
+        subject.upsert(listOf(existingShift)).toList()
+        Assertions.assertEquals(1, SQLUtil.shift(jdbcTemplate).count())
         for (invalidShift in validShifts) {
-            subject.upsert(flowOf(invalidShift)).toList()
+            subject.upsert(listOf(invalidShift)).toList()
         }
-        Assertions.assertEquals(4, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(4, SQLUtil.shift(jdbcTemplate).count())
     }
 
     @Test
@@ -178,10 +171,10 @@ class ShiftRepositoryTest {
         )
         val duplicateShift = newShift().copy(employeeId = employee4.id, startShift = now.plusSeconds(29), endShift = now.plusSeconds(31))
 
-        assertThrows<ShiftConstraintViolationException> {
-            subject.upsert((validShifts + duplicateShift).asFlow()).toList()
+        assertThrows<ShiftRowOperationException> {
+            subject.upsert((validShifts + duplicateShift)).toList()
         }
-        Assertions.assertEquals(0, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(0, SQLUtil.shift(jdbcTemplate).count())
     }
 
     @Test
@@ -189,63 +182,63 @@ class ShiftRepositoryTest {
         val shift = newShift()
 
         val ex = assertThrows<ShiftConstraintEmployeeNotFoundException> {
-            subject.upsert(flowOf(shift)).toList()
+            subject.upsert(listOf(shift)).toList()
         }
         Assertions.assertEquals(ex.shifts, listOf(shift))
     }
 
     @Test
     fun `get - It obtains the entities`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee2.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
         )
         val insertedShifts = subject.upsert(shifts).toList()
-        Assertions.assertEquals(3, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(3, SQLUtil.shift(jdbcTemplate).count())
 
-        val loadedEntities = subject.get(insertedShifts.map { it.id }.asFlow()).toList()
+        val loadedEntities = subject.get(insertedShifts.map { it.id }).toList()
 
         Assertions.assertEquals(insertedShifts, loadedEntities)
     }
 
     @Test
     fun `get - Returns an empty flow if no id is provided`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee2.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
         )
         subject.upsert(shifts).toList()
-        Assertions.assertEquals(3, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(3, SQLUtil.shift(jdbcTemplate).count())
 
-        val loadedEntities = subject.get(emptyFlow()).toList()
+        val loadedEntities = subject.get(emptyList()).toList()
 
         Assertions.assertEquals(emptyList<Shift>(), loadedEntities)
     }
 
     @Test
     fun `get - It returns empty flow if the entity does not does not exist`() = runBlocking {
-        Assertions.assertEquals(emptyList<Shift>(), subject.get(flowOf(randomInt())).toList())
+        Assertions.assertEquals(emptyList<Shift>(), subject.get(listOf(randomInt())).toList())
     }
 
     @Test
     fun `findByEmployeeIds - Returns empty result when no id is provided`() = runBlocking {
-        val result = subject.findByEmployeeIds(flowOf()).toList()
+        val result = subject.findByEmployeeIds(listOf()).toList()
 
         Assertions.assertEquals(emptyList<Shift>(), result)
     }
 
     @Test
     fun `findByEmployeeIds - Returns empty result when there is no matching employee`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee2.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
         )
         subject.upsert(shifts).toList()
 
-        val result = subject.findByEmployeeIds(flowOf(employee4.id)).toList()
+        val result = subject.findByEmployeeIds(listOf(employee4.id)).toList()
 
         Assertions.assertEquals(emptyList<Shift>(), result)
     }
@@ -260,42 +253,42 @@ class ShiftRepositoryTest {
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
         )
-        val allSavedShifts = subject.upsert((expectedShifts + otherShifts).asFlow()).toList()
+        val allSavedShifts = subject.upsert((expectedShifts + otherShifts)).toList()
         val savedEmployee2Shifts = allSavedShifts.filter { it.employeeId == employee2.id }.toSet()
 
-        val result = subject.findByEmployeeIds(flowOf(employee2.id)).toSet()
+        val result = subject.findByEmployeeIds(listOf(employee2.id)).toSet()
 
         Assertions.assertEquals(savedEmployee2Shifts, result)
     }
 
     @Test
     fun `delete - It deletes the entities`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee2.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
         )
         val insertedShifts = subject.upsert(shifts).toList()
-        Assertions.assertEquals(3, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(3, SQLUtil.shift(jdbcTemplate).count())
 
-        subject.delete(insertedShifts.map { it.id }.asFlow())
+        subject.delete(insertedShifts.map { it.id })
 
-        Assertions.assertEquals(0, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(0, SQLUtil.shift(jdbcTemplate).count())
     }
 
     @Test
     fun `delete - It deletes the shifts when the user is deleted`() = runBlocking {
-        val shifts = flowOf(
+        val shifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee2.id, startShift = now, endShift = now.plusSeconds(60)),
             newShift().copy(employeeId = employee3.id, startShift = now, endShift = now.plusSeconds(60))
         )
         subject.upsert(shifts).toList()
-        Assertions.assertEquals(3, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(3, SQLUtil.shift(jdbcTemplate).count())
 
-        SQLUtil.employee(databaseClient).clear()
+        SQLUtil.employee(jdbcTemplate).clear()
 
-        Assertions.assertEquals(0, SQLUtil.employee(databaseClient).count())
-        Assertions.assertEquals(0, SQLUtil.shift(databaseClient).count())
+        Assertions.assertEquals(0, SQLUtil.employee(jdbcTemplate).count())
+        Assertions.assertEquals(0, SQLUtil.shift(jdbcTemplate).count())
     }
 }

@@ -1,24 +1,32 @@
 package com.bphenriques.employeeshifts.testhelper
 
-import org.springframework.r2dbc.core.DatabaseClient
+import org.springframework.jdbc.core.JdbcTemplate
 
 object SQLUtil {
-    fun clearAll(client: DatabaseClient) {
-        this.employee(client).clear()
-        this.shift(client).clear()
+    fun clearAll(jdbcTemplate: JdbcTemplate) {
+        this.employee(jdbcTemplate).clear()
+        this.shift(jdbcTemplate).clear()
     }
 }
 
-class EmployeeTableUtil(private val client: DatabaseClient) {
-    fun clear() {
-        client.sql("DELETE FROM employee;").fetch().one().block()
-    }
-}
-fun SQLUtil.employee(client: DatabaseClient): EmployeeTableUtil = EmployeeTableUtil(client)
+class EmployeeTableUtil(private val jdbcTemplate: JdbcTemplate) {
 
-class ShiftTableUtil(private val client: DatabaseClient) {
     fun clear() {
-        client.sql("DELETE FROM shift;").fetch().one().block()
+        jdbcTemplate.execute("DELETE FROM employee;")
     }
+
+    fun count(): Int = jdbcTemplate.queryForObject("SELECT COUNT (*) FROM employee;", Int::class.java) ?: error("Unexpected failed result")
 }
-fun SQLUtil.shift(client: DatabaseClient): ShiftTableUtil = ShiftTableUtil(client)
+
+class ShiftTableUtil(private val jdbcTemplate: JdbcTemplate) {
+
+    fun clear() {
+        jdbcTemplate.execute("DELETE FROM shift;")
+    }
+
+    fun count(): Int = jdbcTemplate.queryForObject("SELECT COUNT (*) FROM shift;", Int::class.java) ?: error("Unexpected failed result")
+}
+
+// Accessors for API convenience and scope.
+fun SQLUtil.employee(client: JdbcTemplate): EmployeeTableUtil = EmployeeTableUtil(client)
+fun SQLUtil.shift(client: JdbcTemplate): ShiftTableUtil = ShiftTableUtil(client)

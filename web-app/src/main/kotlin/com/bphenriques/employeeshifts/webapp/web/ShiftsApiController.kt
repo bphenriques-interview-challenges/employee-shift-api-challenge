@@ -4,13 +4,11 @@ import com.bphenriques.employeeshifts.domain.shift.model.Shift
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEmployeeNotFoundException
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEndBeforeOrAtStartException
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintOverlappingShiftsException
-import com.bphenriques.employeeshifts.domain.shift.model.UnexpectedUnmappedConstraintViolation
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftUnmappedFailedOperation
 import com.bphenriques.employeeshifts.domain.shift.service.ShiftService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -35,23 +33,22 @@ class ShiftApiController(
 
     @Operation(summary = "Create or update Shifts")
     @PostMapping
-    suspend fun upsert(@Valid @RequestBody shiftsRequests: List<UpsertShiftsRequest>): ResponseEntity<Flow<ShiftResponse>> {
-        // Note: It can accept Flow<UpsertShiftsRequest>, however, it leads to lazy parsing and we want input to be validated early.
-        val savedShifts = shiftService.upsert(shiftsRequests.asFlow().map { it.toShift() })
+    suspend fun upsert(@Valid @RequestBody shiftsRequests: List<UpsertShiftsRequest>): ResponseEntity<List<ShiftResponse>> {
+        val savedShifts = shiftService.upsert(shiftsRequests.map { it.toShift() })
         return ResponseEntity.ok(savedShifts.map { ShiftResponse.fromShift(it) })
     }
 
     @Operation(summary = "Find Shifts")
     @GetMapping("/find")
-    suspend fun find(@RequestParam(name = "employee_ids") employeeIds: List<Int>): ResponseEntity<Flow<ShiftResponse>> {
-        val fetchedShifts = shiftService.findByEmployeeIds(employeeIds.asFlow())
+    suspend fun find(@RequestParam(name = "employee_ids") employeeIds: List<Int>): ResponseEntity<List<ShiftResponse>> {
+        val fetchedShifts = shiftService.findByEmployeeIds(employeeIds)
         return ResponseEntity.ok(fetchedShifts.map { ShiftResponse.fromShift(it) })
     }
 
     @Operation(summary = "Delete Shifts")
     @DeleteMapping
     suspend fun delete(@RequestParam(name = "ids") ids: List<Int>): ResponseEntity<Unit> {
-        shiftService.delete(ids.asFlow())
+        shiftService.delete(ids)
         return ResponseEntity.ok().build()
     }
 }
@@ -61,8 +58,8 @@ class ShiftApiControllerErrorHandling {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @ExceptionHandler(UnexpectedUnmappedConstraintViolation::class)
-    fun handleUnexpectedUnmappedConstraintViolation(ex: UnexpectedUnmappedConstraintViolation): ResponseEntity<ErrorResponse> {
+    @ExceptionHandler(ShiftUnmappedFailedOperation::class)
+    fun handleUnexpectedUnmappedConstraintViolation(ex: ShiftUnmappedFailedOperation): ResponseEntity<ErrorResponse> {
         logger.warn(ex.message)
         return ApiError.UNEXPECTED_ERROR.toResponseEntity()
     }

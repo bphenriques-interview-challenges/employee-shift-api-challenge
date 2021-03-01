@@ -4,14 +4,14 @@ import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintAlreadyInUseException
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeFieldsTooLargeException
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeNotFoundException
+import com.bphenriques.employeeshifts.domain.employee.model.EmployeeUnmappedFailedOperation
 import com.bphenriques.employeeshifts.domain.employee.repository.DomainEmployeeRepository
 import org.slf4j.LoggerFactory
-import org.springframework.dao.DataIntegrityViolationException
-import org.springframework.data.repository.kotlin.CoroutineCrudRepository
-import org.springframework.r2dbc.BadSqlGrammarException
+import org.springframework.data.relational.core.conversion.DbActionExecutionException
+import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
-interface RawEmployeeRepository : CoroutineCrudRepository<EmployeeRow, Int>
+interface RawEmployeeRepository : CrudRepository<EmployeeRow, Int>
 
 @Repository
 class EmployeeRepository(
@@ -20,30 +20,31 @@ class EmployeeRepository(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override suspend fun upsert(employee: Employee): Employee {
+    override suspend fun upsert(employee: Employee): Employee =
         try {
             val upsertedEmployee = rawEmployeeRepository.save(employee.toEmployeeRow())
-            logger.info("[UPSERT] Upserted $upsertedEmployee")
-            return upsertedEmployee.toEmployee()
-        } catch (ex: DataIntegrityViolationException) {
-            logger.warn("[ERROR] Constraint violation when upserting employee ($employee): ${ex.message}", ex)
-            // It is is the only data integrity constraint present. No need to check which integrity rule broke.
-            throw EmployeeConstraintAlreadyInUseException(employee, ex)
-        } catch (ex: BadSqlGrammarException) {
-            logger.warn("[ERROR] Field too large when upserting employee: ${ex.message}", ex)
-            throw EmployeeFieldsTooLargeException(employee, ex)
+            logger.info("[UPSERT EMPLOYEE] Upserted $upsertedEmployee")
+            upsertedEmployee.toEmployee()
+        } catch (ex: DbActionExecutionException) {
+            logger.warn("[UPSERT EMPLOYEE] Error: Failed to perform action in the DB: ${ex.message}", ex)
+            val message = ex.cause?.message
+            when {
+                // Ideally DbActionExecutionException provide directly the constraint being violated.
+                message == null -> error("[EMPLOYEE] Data Integrity violation but lack of message which is unexpected.")
+                message.contains("employee_address_key") -> throw EmployeeConstraintAlreadyInUseException(employee, ex)
+                message.contains("value too long") -> throw EmployeeFieldsTooLargeException(employee, ex)
+                else -> throw EmployeeUnmappedFailedOperation(employee, ex)
+            }
         }
-    }
 
     override suspend fun get(id: Int): Employee {
-        logger.debug("[GET] $id")
-        return rawEmployeeRepository.findById(id)?.toEmployee() ?: throw EmployeeNotFoundException(id)
+        logger.debug("[GET EMPLOYEE] $id")
+        return rawEmployeeRepository.findById(id).orElse(null)?.toEmployee() ?: throw EmployeeNotFoundException(id)
     }
 
     override suspend fun delete(id: Int) {
-        logger.debug("[DELETE] $id")
         rawEmployeeRepository.deleteById(id)
-        logger.info("[DELETED] $id")
+        logger.info("[DELETED EMPLOYEE] $id")
     }
 
     private fun Employee.toEmployeeRow() = EmployeeRow(

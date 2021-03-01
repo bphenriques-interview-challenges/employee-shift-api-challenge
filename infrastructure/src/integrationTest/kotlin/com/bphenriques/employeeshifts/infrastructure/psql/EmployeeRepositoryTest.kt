@@ -4,7 +4,6 @@ import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintAlreadyInUseException
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeFieldsTooLargeException
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeNotFoundException
-import com.bphenriques.employeeshifts.infrastructure.configuration.FlywayConfiguration
 import com.bphenriques.employeeshifts.testhelper.sql.SQLUtil
 import com.bphenriques.employeeshifts.testhelper.sql.employee
 import com.bphenriques.test.Generator.randomInt
@@ -18,23 +17,23 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.r2dbc.core.DatabaseClient
+import org.springframework.jdbc.core.JdbcTemplate
 
 @SpringBootTest
 class EmployeeRepositoryTest {
 
-    @SpringBootApplication(scanBasePackageClasses = [EmployeeRepository::class, FlywayConfiguration::class])
+    @SpringBootApplication(scanBasePackageClasses = [EmployeeRepository::class])
     class App
 
     @Autowired
     private lateinit var subject: EmployeeRepository
 
     @Autowired
-    private lateinit var databaseClient: DatabaseClient
+    private lateinit var jdbcTemplate: JdbcTemplate
 
     @BeforeEach
     fun setup() {
-        SQLUtil.employee(databaseClient).clear()
+        SQLUtil.employee(jdbcTemplate).clear()
     }
 
     @Test
@@ -48,7 +47,7 @@ class EmployeeRepositoryTest {
 
         val result = subject.upsert(employee)
 
-        val numberRows = SQLUtil.employee(databaseClient).count()
+        val numberRows = SQLUtil.employee(jdbcTemplate).count()
         Assertions.assertEquals(1, numberRows)
         Assertions.assertEquals(employee.copy(result.id), result)
     }
@@ -62,7 +61,7 @@ class EmployeeRepositoryTest {
             address = uuid()
         )
         val inserted = subject.upsert(employee)
-        val numberRows = SQLUtil.employee(databaseClient).count()
+        val numberRows = SQLUtil.employee(jdbcTemplate).count()
         Assertions.assertEquals(1, numberRows)
         val updatedEmployee = inserted.copy(address = uuid())
 
@@ -81,7 +80,7 @@ class EmployeeRepositoryTest {
             address = uuid()
         )
         subject.upsert(employee)
-        Assertions.assertEquals(1, SQLUtil.employee(databaseClient).count())
+        Assertions.assertEquals(1, SQLUtil.employee(jdbcTemplate).count())
         val conflictingEmployee = Employee(
             id = 0,
             firstName = uuid(),
@@ -94,7 +93,7 @@ class EmployeeRepositoryTest {
         }
         Assertions.assertEquals(ex.employee, conflictingEmployee)
         // Database state remains the same
-        Assertions.assertEquals(1, SQLUtil.employee(databaseClient).count())
+        Assertions.assertEquals(1, SQLUtil.employee(jdbcTemplate).count())
     }
 
     @Test
@@ -106,7 +105,7 @@ class EmployeeRepositoryTest {
             address = stringOfLength(255)
         )
         subject.upsert(unusualEmployee)
-        Assertions.assertEquals(1, SQLUtil.employee(databaseClient).count())
+        Assertions.assertEquals(1, SQLUtil.employee(jdbcTemplate).count())
         val violatingEmployees = listOf(
             unusualEmployee.copy(firstName = unusualEmployee.firstName + "z"),
             unusualEmployee.copy(firstName = unusualEmployee.lastName + "z"),
@@ -121,7 +120,7 @@ class EmployeeRepositoryTest {
         }
 
         // Database state remains the same
-        Assertions.assertEquals(1, SQLUtil.employee(databaseClient).count())
+        Assertions.assertEquals(1, SQLUtil.employee(jdbcTemplate).count())
     }
 
     @Test
@@ -158,10 +157,10 @@ class EmployeeRepositoryTest {
             address = uuid()
         )
         val savedEntity = subject.upsert(employee)
-        Assertions.assertEquals(1, SQLUtil.employee(databaseClient).count())
+        Assertions.assertEquals(1, SQLUtil.employee(jdbcTemplate).count())
 
         subject.delete(savedEntity.id)
 
-        Assertions.assertEquals(0, SQLUtil.employee(databaseClient).count())
+        Assertions.assertEquals(0, SQLUtil.employee(jdbcTemplate).count())
     }
 }
