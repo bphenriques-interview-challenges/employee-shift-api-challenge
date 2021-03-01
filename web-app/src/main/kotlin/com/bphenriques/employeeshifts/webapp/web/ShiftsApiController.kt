@@ -7,7 +7,10 @@ import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintOverlapp
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftUnmappedFailedOperation
 import com.bphenriques.employeeshifts.domain.shift.service.ShiftService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
@@ -32,6 +35,14 @@ class ShiftApiController(
 ) {
 
     @Operation(summary = "Create or update Shifts")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Successful operation"),
+            ApiResponse(responseCode = "400", description = "If the shift is not valid", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "If the employee does not exist", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "409", description = "If the shift conflicts with the existing ones", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ]
+    )
     @PostMapping
     suspend fun upsert(@Valid @RequestBody shiftsRequests: List<UpsertShiftsRequest>): ResponseEntity<List<ShiftResponse>> {
         val savedShifts = shiftService.upsert(shiftsRequests.map { it.toShift() })
@@ -39,6 +50,11 @@ class ShiftApiController(
     }
 
     @Operation(summary = "Find Shifts")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Successful operation")
+        ]
+    )
     @GetMapping("/find")
     suspend fun find(@RequestParam(name = "employee_ids") employeeIds: List<Int>): ResponseEntity<List<ShiftResponse>> {
         val fetchedShifts = shiftService.findByEmployeeIds(employeeIds)
@@ -46,6 +62,11 @@ class ShiftApiController(
     }
 
     @Operation(summary = "Delete Shifts")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Successful operation"),
+        ]
+    )
     @DeleteMapping
     suspend fun delete(@RequestParam(name = "ids") ids: List<Int>): ResponseEntity<Unit> {
         shiftService.delete(ids)

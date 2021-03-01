@@ -6,7 +6,10 @@ import com.bphenriques.employeeshifts.domain.employee.model.EmployeeFieldsTooLar
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeNotFoundException
 import com.bphenriques.employeeshifts.domain.employee.service.EmployeeService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -32,6 +35,13 @@ class EmployeeApiController(
 ) {
 
     @Operation(summary = "Create Employee")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "201", description = "Successful operation"),
+            ApiResponse(responseCode = "400", description = "If the provided fields are invalid", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "409", description = "If there is already an user with the provided address", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ]
+    )
     @PostMapping
     suspend fun create(@Valid @RequestBody employeeRequest: CreateEmployeeRequest): ResponseEntity<EmployeeResponse> {
         val savedEmployee = employeeService.upsert(employeeRequest.toEmployee())
@@ -41,6 +51,12 @@ class EmployeeApiController(
     }
 
     @Operation(summary = "Get Employee")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Successful operation", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "If the user does not exist", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ]
+    )
     @GetMapping("/{id}")
     suspend fun get(@PathVariable id: Int): ResponseEntity<EmployeeResponse> {
         val fetchedEmployee = employeeService.get(id)
@@ -48,6 +64,13 @@ class EmployeeApiController(
     }
 
     @Operation(summary = "Update Employee")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Successful operation"),
+            ApiResponse(responseCode = "400", description = "If the provided fields are invalid", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "409", description = "If there is already an user with the provided address", content = [Content(schema = Schema(implementation = ErrorResponse::class))])
+        ]
+    )
     @PutMapping("/{id}")
     suspend fun update(@PathVariable id: Int, @Valid @RequestBody employeeRequest: UpdateEmployeeRequest): ResponseEntity<EmployeeResponse> {
         val updatedEmployee = employeeService.upsert(employeeRequest.toEmployee(id))
@@ -61,6 +84,11 @@ class EmployeeApiController(
     }
 
     @Operation(summary = "Delete Employee")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Successful operation"),
+        ]
+    )
     @DeleteMapping("/{id}")
     suspend fun delete(@PathVariable id: Int): ResponseEntity<Unit> {
         employeeService.delete(id)

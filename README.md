@@ -32,7 +32,7 @@ $ make build-local
 
 ### Kubernetes
 
-Create if not exist the `bphenriques/employee-shifts-api:latest` docker image:
+Create if absent the `bphenriques/employee-shifts-api:latest` docker image:
 ```sh
 $ make build
 ```
@@ -51,12 +51,14 @@ $ make run
 $ make run-local
 ```
 
-The API-Docs are available at http://localhost:8080/swagger-ui.html and there are three additional endpoints on port `8081` which is specific for monitoring:
+## What is available
+
+The API-Docs are available at http://localhost:8080/swagger-ui.html and there are three additional endpoints on port `8081` which are specific for monitoring:
 - **Liveness Probe**: localhost:8081/actuator/health/liveness
 - **Readiness Probe**: localhost:8081/actuator/health/readiness
 - **Prometheus Metrics**: localhost:8081/actuator/prometheus
 
-**Note**: Kubernetes uses different ports. See the guide [there](k8s/README.md).
+**Note**: Kubernetes uses different ports. See the guide [there](k8s/README.md) to see which ports it uses.
 
 ## Testing
 
