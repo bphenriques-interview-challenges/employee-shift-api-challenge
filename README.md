@@ -1,3 +1,5 @@
+<img src="https://github.com/bphenriques-lab/employee-shift-api-challenge/actions/workflows/build.yaml/badge.svg" />
+
 # Employee Shift API
 
 The challenge description is available [here](docs/challenge.md).

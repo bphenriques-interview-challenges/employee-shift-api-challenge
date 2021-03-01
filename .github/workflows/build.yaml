@@ -1,0 +1,13 @@
+# Demonstrating having CI/CD leveraging local containers (docker-compose).
+name: Build
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the project
+        run: make test

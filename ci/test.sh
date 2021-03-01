@@ -3,7 +3,7 @@ set -xu
 
 # Reference page: https://gist.github.com/earthgecko/3089509
 random_string() {
-    cat /dev/urandom | env LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1
+    tr -dc A-Za-z0-9 </dev/urandom | head -c 13
 }
 
 PROJECT_NAME="$(random_string)"
