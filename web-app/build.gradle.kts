@@ -40,8 +40,6 @@ dependencies {
         exclude(module = "mockito-core")
     }
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("io.mockk:mockk:${AppVersion.MOCKK}")
-    testImplementation("com.ninja-squad:springmockk:${AppVersion.SPRING_MOCKK}")
 }
 
 // Setup acceptance Tests Target

@@ -15,8 +15,6 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${AppVersion.COROUTINES}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${AppVersion.COROUTINES}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${AppVersion.COROUTINES}")
 
     // Test Dependencies
     testImplementation(project(":common-test"))
@@ -24,9 +22,7 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine") // exclude junit4
         exclude(module = "mockito-core")
     }
-    testImplementation("io.projectreactor:reactor-test")
     testImplementation("io.mockk:mockk:${AppVersion.MOCKK}")
-    testImplementation("com.ninja-squad:springmockk:${AppVersion.SPRING_MOCKK}")
 }
 
 // See https://github.com/gradle/kotlin-dsl-samples/issues/393

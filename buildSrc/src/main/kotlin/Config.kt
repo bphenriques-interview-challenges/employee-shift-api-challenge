@@ -12,5 +12,4 @@ object AppVersion {
 
     // Test
     const val MOCKK = "1.10.6"
-    const val SPRING_MOCKK = "3.0.1"
 }
