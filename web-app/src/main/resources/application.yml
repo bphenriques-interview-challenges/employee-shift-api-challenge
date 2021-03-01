@@ -22,10 +22,3 @@ management:
     web.exposure.include:
       - health
       - prometheus
-
-  metrics:
-    # instrumentation of requests handled by Spring MVC
-    web.server.request.autotime.enabled: true
-    distribution.percentiles-histogram.http:
-      server.requests: true
-      client.requests: true
