@@ -2,6 +2,9 @@ package com.bphenriques.employeeshifts.infrastructure.psql
 
 import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.domain.shift.model.Shift
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEmployeeNotFoundException
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEndBeforeOrAtStartException
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintOverlappingShiftsException
 import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintViolationException
 import com.bphenriques.employeeshifts.infrastructure.configuration.FlywayConfiguration
 import com.bphenriques.employeeshifts.testhelper.sql.SQLUtil
@@ -117,21 +120,21 @@ class ShiftRepositoryTest {
     }
 
     @Test
-    fun `upsert - It throws ShiftConstraintViolationException when end_shift is before or at start_shift`() = runBlocking {
+    fun `upsert - It throws ShiftConstraintEndBeforeOrAtStartException when end_shift is before or at start_shift`() = runBlocking {
         val invalidShifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now),
             newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.minusSeconds(1))
         )
 
         for (invalidShift in invalidShifts) {
-            assertThrows<ShiftConstraintViolationException> {
+            assertThrows<ShiftConstraintEndBeforeOrAtStartException> {
                 subject.upsert(flowOf(invalidShift)).toList()
             }
         }
     }
 
     @Test
-    fun `upsert - It throws ShiftConstraintViolationException when the same employee has overlapping shifts`() = runBlocking {
+    fun `upsert - It throws ShiftConstraintOverlappingShiftsException when the same employee has overlapping shifts`() = runBlocking {
         val existingShift = newShift().copy(employeeId = employee1.id, startShift = now, endShift = now.plusSeconds(30))
         val invalidShifts = listOf(
             newShift().copy(employeeId = employee1.id, startShift = now.minusSeconds(1), endShift = now.plusSeconds(1)), // left
@@ -142,7 +145,7 @@ class ShiftRepositoryTest {
         subject.upsert(flowOf(existingShift)).toList()
         Assertions.assertEquals(1, SQLUtil.shift(databaseClient).count())
         for (invalidShift in invalidShifts) {
-            assertThrows<ShiftConstraintViolationException> {
+            assertThrows<ShiftConstraintOverlappingShiftsException> {
                 subject.upsert(flowOf(invalidShift)).toList()
             }
         }
@@ -182,10 +185,10 @@ class ShiftRepositoryTest {
     }
 
     @Test
-    fun `upsert - It throws ShiftConstraintViolationException if the employee does not exist`() = runBlocking {
+    fun `upsert - It throws ShiftConstraintEmployeeNotFoundException if the employee does not exist`() = runBlocking {
         val shift = newShift()
 
-        val ex = assertThrows<ShiftConstraintViolationException> {
+        val ex = assertThrows<ShiftConstraintEmployeeNotFoundException> {
             subject.upsert(flowOf(shift)).toList()
         }
         Assertions.assertEquals(ex.shifts, listOf(shift))

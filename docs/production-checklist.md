@@ -21,7 +21,6 @@ Non-functional requirements:
 - K8S setup lack [rolling updates](https://www.bluematador.com/blog/kubernetes-deployments-rolling-update-configuration) to ensure consistent release versions on multiple pods during upgrades.
 - K8S deployment lack of proper management of secrets (they are being version-controlled).
 - Monitoring infrastructure (e.g., Grafana for Telemetry and Elastic stack for logging).
-- Unfortunately constraint validations errors are opaque and is hard to provide helpful information to caller without manually parsing the String messages.
 - API-Docs are good enough atm for demonstration. I am lazy and dislike manual (architecture) documentation.
 - Structured logging to ease log filtering (e.g., by employee id).
 - There is no data retention policy (for simplicity).

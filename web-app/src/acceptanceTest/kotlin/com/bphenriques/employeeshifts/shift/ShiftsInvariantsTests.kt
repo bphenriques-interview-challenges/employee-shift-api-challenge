@@ -4,6 +4,7 @@ import com.bphenriques.employeeshifts.domain.employee.model.Employee
 import com.bphenriques.employeeshifts.testhelper.EmployeeTestClient
 import com.bphenriques.employeeshifts.testhelper.SQLUtil
 import com.bphenriques.employeeshifts.testhelper.ShiftTestClient
+import com.bphenriques.test.Generator
 import com.bphenriques.test.Generator.newEmployee
 import com.bphenriques.test.Generator.newShift
 import org.junit.jupiter.api.BeforeEach
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpStatus
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.test.annotation.DirtiesContext
 import java.time.Instant
@@ -64,18 +66,17 @@ class ShiftsInvariantsTests {
         val employee = createEmployee(newEmployee())
         val validShift = newShift().copy(employeeId = employee.id, startShift = now, endShift = now.plus(30, ChronoUnit.MINUTES))
         val invalidShifts = listOf(
-            newShift().copy(employeeId = employee.id, startShift = now.minus(1, ChronoUnit.MINUTES), endShift = now.plus(1, ChronoUnit.MINUTES)), // left
-            newShift().copy(employeeId = employee.id, startShift = now.plus(1, ChronoUnit.MINUTES), endShift = now.plus(1, ChronoUnit.MINUTES)), // middle
-            newShift().copy(employeeId = employee.id, startShift = now.plus(29, ChronoUnit.MINUTES), endShift = now.plus(31, ChronoUnit.MINUTES)), // right
+            newShift().copy(employeeId = employee.id, startShift = now.minus(1, ChronoUnit.MINUTES), endShift = now.plus(1, ChronoUnit.MINUTES)),
+            newShift().copy(employeeId = employee.id, startShift = now, endShift = now.plus(1, ChronoUnit.MINUTES))
         )
         val createValidShift = shiftTestClient.upsertShifts(listOf(validShift))
         createValidShift.expectStatus().isOk
 
         // Is rejected regardless if inserted in batch or not
         for (invalidShift in invalidShifts) {
-            shiftTestClient.upsertShifts(listOf(invalidShift)).expectStatus().isBadRequest
+            shiftTestClient.upsertShifts(listOf(invalidShift)).expectStatus().isEqualTo(HttpStatus.CONFLICT)
         }
-        shiftTestClient.upsertShifts(invalidShifts).expectStatus().isBadRequest
+        shiftTestClient.upsertShifts(invalidShifts).expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }
 
     @Test
@@ -95,6 +96,13 @@ class ShiftsInvariantsTests {
     }
 
     @Test
+    fun `It returns NOT_FOUND (404) when the employee does not exist`() {
+        val shift = newShift().copy(employeeId = Generator.randomInt(), startShift = now, endShift = now.plus(1, ChronoUnit.MINUTES))
+
+        shiftTestClient.upsertShifts(listOf(shift)).expectStatus().isNotFound
+    }
+
+    @Test
     fun `When a shift in the batch is invalid, all the shifts are rejected`() {
         val employee = createEmployee(newEmployee())
         val validShift = newShift().copy(employeeId = employee.id, startShift = now, endShift = now.plus(30, ChronoUnit.MINUTES))
@@ -108,9 +116,9 @@ class ShiftsInvariantsTests {
 
         // Is rejected regardless if inserted in batch or not
         for (invalidShift in invalidShifts) {
-            shiftTestClient.upsertShifts(listOf(invalidShift)).expectStatus().isBadRequest
+            shiftTestClient.upsertShifts(listOf(invalidShift)).expectStatus().isEqualTo(HttpStatus.CONFLICT)
         }
-        shiftTestClient.upsertShifts(invalidShifts).expectStatus().isBadRequest
+        shiftTestClient.upsertShifts(invalidShifts).expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }
 
     private fun createEmployee(employee: Employee): Employee =

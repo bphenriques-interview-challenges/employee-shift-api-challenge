@@ -14,4 +14,3 @@ CREATE TABLE shift (
     REFERENCES employee(id)
     ON DELETE CASCADE
 );
-

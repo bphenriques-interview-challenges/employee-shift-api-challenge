@@ -21,10 +21,10 @@ class ShiftService(
          *
          * Normalizing here, allows having a more flexible external contract.
          */
-        val shiftsPrecisionToMinute = shifts.map { shift ->
-            shift.copy(
-                startShift = shift.startShift.truncatedTo(ChronoUnit.MINUTES),
-                endShift = shift.endShift.truncatedTo(ChronoUnit.MINUTES)
+        val shiftsPrecisionToMinute = shifts.map {
+            it.copy(
+                startShift = it.startShift.truncatedTo(ChronoUnit.MINUTES),
+                endShift = it.endShift.truncatedTo(ChronoUnit.MINUTES)
             )
         }
         return repository.upsert(shiftsPrecisionToMinute)

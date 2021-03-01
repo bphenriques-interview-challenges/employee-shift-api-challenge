@@ -1,7 +1,10 @@
 package com.bphenriques.employeeshifts.infrastructure.psql
 
 import com.bphenriques.employeeshifts.domain.shift.model.Shift
-import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintViolationException
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEmployeeNotFoundException
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEndBeforeOrAtStartException
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintOverlappingShiftsException
+import com.bphenriques.employeeshifts.domain.shift.model.UnexpectedUnmappedConstraintViolation
 import com.bphenriques.employeeshifts.domain.shift.repository.DomainShiftRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -44,11 +47,15 @@ class ShiftRepository(
             when (ex) {
                 is DataIntegrityViolationException -> {
                     logger.warn("[UPSERT] Error: Constraint violation when upserting shifts: ${ex.message}", ex)
-                    throw ShiftConstraintViolationException(shifts.toList(), ex)
-                }
-                else -> {
-                    logger.error("Unexpected error encountered: $ex", ex)
-                    throw ex
+                    val message = ex.message
+                    when {
+                        // Ideally DataIntegrityViolationException provide directly the constraint being violated.
+                        message == null -> error("Data Integrity violation but lack of message which is unexpected.")
+                        message.contains("start_shift_after_end_shift") -> throw ShiftConstraintEndBeforeOrAtStartException(shifts.toList(), ex)
+                        message.contains("employee_non_overlapping_shifts") -> throw ShiftConstraintOverlappingShiftsException(shifts.toList(), ex)
+                        message.contains("fk_employee") -> throw ShiftConstraintEmployeeNotFoundException(shifts.toList(), ex)
+                        else -> throw UnexpectedUnmappedConstraintViolation(shifts.toList(), ex)
+                    }
                 }
             }
         }
@@ -59,7 +66,7 @@ class ShiftRepository(
     override suspend fun findByEmployeeIds(employeeIds: Flow<Int>): Flow<Shift> {
         // @Query binding methods do not support Flow<*> and IN does not work with empty list.
         val employeeIdsList = employeeIds.toList()
-        return if (employeeIdsList.isEmpty()) { // count() materializes the whole flow, I just need to check if it is empty.
+        return if (employeeIdsList.isEmpty()) {
             logger.trace("[FIND] Skipping due to empty collection provided")
             emptyFlow()
         } else {

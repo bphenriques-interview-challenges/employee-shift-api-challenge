@@ -1,7 +1,10 @@
 package com.bphenriques.employeeshifts.webapp.web
 
 import com.bphenriques.employeeshifts.domain.shift.model.Shift
-import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintViolationException
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEmployeeNotFoundException
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintEndBeforeOrAtStartException
+import com.bphenriques.employeeshifts.domain.shift.model.ShiftConstraintOverlappingShiftsException
+import com.bphenriques.employeeshifts.domain.shift.model.UnexpectedUnmappedConstraintViolation
 import com.bphenriques.employeeshifts.domain.shift.service.ShiftService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
@@ -32,8 +35,9 @@ class ShiftApiController(
 
     @Operation(summary = "Create or update Shifts")
     @PostMapping
-    suspend fun upsert(@Valid @RequestBody shiftsRequests: Flow<UpsertShiftsRequest>): ResponseEntity<Flow<ShiftResponse>> {
-        val savedShifts = shiftService.upsert(shiftsRequests.map { it.toShift() })
+    suspend fun upsert(@Valid @RequestBody shiftsRequests: List<UpsertShiftsRequest>): ResponseEntity<Flow<ShiftResponse>> {
+        // Note: It can accept Flow<UpsertShiftsRequest>, however, it leads to lazy parsing and we want input to be validated early.
+        val savedShifts = shiftService.upsert(shiftsRequests.asFlow().map { it.toShift() })
         return ResponseEntity.ok(savedShifts.map { ShiftResponse.fromShift(it) })
     }
 
@@ -57,10 +61,28 @@ class ShiftApiControllerErrorHandling {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @ExceptionHandler(ShiftConstraintViolationException::class)
-    fun handleShiftConstraintViolationException(ex: ShiftConstraintViolationException): ResponseEntity<ErrorResponse> {
+    @ExceptionHandler(UnexpectedUnmappedConstraintViolation::class)
+    fun handleUnexpectedUnmappedConstraintViolation(ex: UnexpectedUnmappedConstraintViolation): ResponseEntity<ErrorResponse> {
         logger.warn(ex.message)
-        return ApiError.SHIFT_CONFLICTING_OPERATION.toResponseEntity()
+        return ApiError.UNEXPECTED_ERROR.toResponseEntity()
+    }
+
+    @ExceptionHandler(ShiftConstraintEmployeeNotFoundException::class)
+    fun handleShiftConstraintEmployeeNotFoundException(ex: ShiftConstraintEmployeeNotFoundException): ResponseEntity<ErrorResponse> {
+        logger.warn(ex.message)
+        return ApiError.SHIFT_EMPLOYEE_NOT_FOUND.toResponseEntity()
+    }
+
+    @ExceptionHandler(ShiftConstraintEndBeforeOrAtStartException::class)
+    fun handleShiftConstraintEndBeforeOrAtStartException(ex: ShiftConstraintEndBeforeOrAtStartException): ResponseEntity<ErrorResponse> {
+        logger.warn(ex.message)
+        return ApiError.SHIFT_INVALID_START_END_TIMES.toResponseEntity()
+    }
+
+    @ExceptionHandler(ShiftConstraintOverlappingShiftsException::class)
+    fun handleShiftConstraintOverlappingShiftsException(ex: ShiftConstraintOverlappingShiftsException): ResponseEntity<ErrorResponse> {
+        logger.warn(ex.message)
+        return ApiError.SHIFT_OVERLAPPING_SHIFTS.toResponseEntity()
     }
 }
 

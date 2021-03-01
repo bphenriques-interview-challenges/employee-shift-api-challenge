@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpStatus
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.test.annotation.DirtiesContext
 import java.time.Instant
@@ -88,7 +89,7 @@ class SwapShiftsTests {
 
         // Swap. The only shift of employee 2 overlaps with the already existing shift of employee 1
         val (swapedShift1, swappedShift2) = swapShifts(storedShift2Employee1, storedShiftEmployee2)
-        shiftTestClient.upsertShifts(listOf(swapedShift1, swappedShift2)).expectStatus().isBadRequest
+        shiftTestClient.upsertShifts(listOf(swapedShift1, swappedShift2)).expectStatus().isEqualTo(HttpStatus.CONFLICT)
 
         // Check that the original shifts remain unchanged
         val shiftsEmployee1 = shiftTestClient.findShiftsByEmployeeId(listOf(employee1.id))
