@@ -10,17 +10,12 @@ services:
     build:
       context: .
       target: BUILD_IMAGE
-    image: bphenriques/employee-shift-api-test
-    environment:
-      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/postgres
-      SPRING_R2DBC_USERNAME: postgres
-      SPRING_R2DBC_PASSWORD:
-      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/postgres
-      SPRING_FLYWAY_LOCATIONS: filesystem:/app/db/migration
+    env_file:
+      - environment.docker.env
     command: dockerize
               -wait tcp://postgres:5432
               -timeout 5m -wait-retry-interval 2s
-          sh -c '/app/gradlew test integrationTest acceptanceTest'
+        sh -c '/app/gradlew test integrationTest acceptanceTest'
     depends_on:
       - postgres
 
