@@ -73,6 +73,22 @@ class CRUDEmployeeTest {
     }
 
     @Test
+    fun `PUT employee id - It returns 201 when the provided id is 0`() {
+        val employee = newEmployee()
+
+        // Create
+        val createdEmployee = employeeTestClient.updateEmployee(0, employee).run {
+            expectStatus().isCreated
+            expectHeader().contentType(MediaType.APPLICATION_JSON)
+
+            val result = employeeTestClient.extractEmployee(this)
+            expectHeader().location("/employee/${result.id}")
+            result
+        }
+        Assertions.assertEquals(employee, createdEmployee.copy(id = 0))
+    }
+
+    @Test
     fun `GET employee id - It returns 404 when the employee does not exist`() {
         val employeeId = Generator.randomInt()
 

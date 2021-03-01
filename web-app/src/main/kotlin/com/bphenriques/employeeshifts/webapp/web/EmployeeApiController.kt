@@ -50,7 +50,13 @@ class EmployeeApiController(
     @PutMapping("/{id}")
     suspend fun update(@PathVariable id: Int, @Valid @RequestBody employeeRequest: UpdateEmployeeRequest): ResponseEntity<EmployeeResponse> {
         val updatedEmployee = employeeService.upsert(employeeRequest.toEmployee(id))
-        return ResponseEntity.ok(EmployeeResponse.fromEmployee(updatedEmployee))
+        return if (id == 0) {
+            ResponseEntity
+                .created(URI.create("/employee/${updatedEmployee.id}"))
+                .body(EmployeeResponse.fromEmployee(updatedEmployee))
+        } else {
+            ResponseEntity.ok(EmployeeResponse.fromEmployee(updatedEmployee))
+        }
     }
 
     @Operation(summary = "Delete Employee")
