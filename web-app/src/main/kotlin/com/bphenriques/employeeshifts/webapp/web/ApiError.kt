@@ -7,8 +7,8 @@ enum class ApiError(val code: String, val message: String, val httpStatus: HttpS
     UNEXPECTED_ERROR("010000", "An unexpected error has occurred. Contact Support.", HttpStatus.INTERNAL_SERVER_ERROR),
     BAD_REQUEST("010001", "Invalid request.", HttpStatus.BAD_REQUEST),
     EMPLOYEE_NOT_FOUND("010002", "Employee Not found.", HttpStatus.NOT_FOUND),
-    EMPLOYEE_CONFLICTING_OPERATION("010003", "Conflicting employee operation", HttpStatus.CONFLICT),
-    SHIFT_CONFLICTING_OPERATION("010004", "Conflicting shift operation", HttpStatus.CONFLICT)
+    EMPLOYEE_ADDRESS_ALREADY_IN_USE("010003", "There is already an employee using the provided address.", HttpStatus.CONFLICT),
+    SHIFT_CONFLICTING_OPERATION("010004", "Conflicting shift operation.", HttpStatus.CONFLICT)
 }
 
 fun ApiError.toResponseEntity(details: Any? = null): ResponseEntity<ErrorResponse> = ResponseEntity

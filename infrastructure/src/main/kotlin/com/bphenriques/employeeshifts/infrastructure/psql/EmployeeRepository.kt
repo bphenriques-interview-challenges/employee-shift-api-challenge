@@ -1,7 +1,8 @@
 package com.bphenriques.employeeshifts.infrastructure.psql
 
 import com.bphenriques.employeeshifts.domain.employee.model.Employee
-import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintViolationException
+import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintAlreadyInUseException
+import com.bphenriques.employeeshifts.domain.employee.model.EmployeeFieldsTooLargeException
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeNotFoundException
 import com.bphenriques.employeeshifts.domain.employee.repository.DomainEmployeeRepository
 import org.slf4j.LoggerFactory
@@ -26,10 +27,11 @@ class EmployeeRepository(
             return upsertedEmployee.toEmployee()
         } catch (ex: DataIntegrityViolationException) {
             logger.warn("[ERROR] Constraint violation when upserting employee ($employee): ${ex.message}", ex)
-            throw EmployeeConstraintViolationException(employee, ex)
+            // It is is the only data integrity constraint present. No need to check which integrity rule broke.
+            throw EmployeeConstraintAlreadyInUseException(employee, ex)
         } catch (ex: BadSqlGrammarException) {
             logger.warn("[ERROR] Field too large when upserting employee: ${ex.message}", ex)
-            throw EmployeeConstraintViolationException(employee, ex)
+            throw EmployeeFieldsTooLargeException(employee, ex)
         }
     }
 

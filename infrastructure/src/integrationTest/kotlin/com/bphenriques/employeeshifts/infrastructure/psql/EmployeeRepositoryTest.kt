@@ -1,7 +1,8 @@
 package com.bphenriques.employeeshifts.infrastructure.psql
 
 import com.bphenriques.employeeshifts.domain.employee.model.Employee
-import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintViolationException
+import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintAlreadyInUseException
+import com.bphenriques.employeeshifts.domain.employee.model.EmployeeFieldsTooLargeException
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeNotFoundException
 import com.bphenriques.employeeshifts.infrastructure.configuration.FlywayConfiguration
 import com.bphenriques.employeeshifts.testhelper.sql.SQLUtil
@@ -72,7 +73,7 @@ class EmployeeRepositoryTest {
     }
 
     @Test
-    fun `upsert - It throws EmployeeConstraintViolationException if the address is already in use`() = runBlocking {
+    fun `upsert - It throws EmployeeConstraintAlreadyInUseException if the address is already in use`() = runBlocking {
         val employee = Employee(
             id = 0,
             firstName = uuid(),
@@ -88,7 +89,7 @@ class EmployeeRepositoryTest {
             address = employee.address
         )
 
-        val ex = assertThrows<EmployeeConstraintViolationException> {
+        val ex = assertThrows<EmployeeConstraintAlreadyInUseException> {
             subject.upsert(conflictingEmployee)
         }
         Assertions.assertEquals(ex.employee, conflictingEmployee)
@@ -97,7 +98,7 @@ class EmployeeRepositoryTest {
     }
 
     @Test
-    fun `upsert - It throws EmployeeConstraintViolationException if the any of the fields's legth is too large`() = runBlocking {
+    fun `upsert - It throws EmployeeFieldsTooLargeException if the any of the fields's legth is too large`() = runBlocking {
         val unusualEmployee = Employee(
             id = 0,
             firstName = stringOfLength(50),
@@ -113,7 +114,7 @@ class EmployeeRepositoryTest {
         )
 
         for (violatingEmployee in violatingEmployees) {
-            val ex = assertThrows<EmployeeConstraintViolationException> {
+            val ex = assertThrows<EmployeeFieldsTooLargeException> {
                 subject.upsert(violatingEmployee)
             }
             Assertions.assertEquals(ex.employee, violatingEmployee)

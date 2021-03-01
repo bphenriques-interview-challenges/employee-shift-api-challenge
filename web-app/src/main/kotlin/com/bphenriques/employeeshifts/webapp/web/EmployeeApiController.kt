@@ -1,7 +1,8 @@
 package com.bphenriques.employeeshifts.webapp.web
 
 import com.bphenriques.employeeshifts.domain.employee.model.Employee
-import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintViolationException
+import com.bphenriques.employeeshifts.domain.employee.model.EmployeeConstraintAlreadyInUseException
+import com.bphenriques.employeeshifts.domain.employee.model.EmployeeFieldsTooLargeException
 import com.bphenriques.employeeshifts.domain.employee.model.EmployeeNotFoundException
 import com.bphenriques.employeeshifts.domain.employee.service.EmployeeService
 import io.swagger.v3.oas.annotations.Operation
@@ -78,10 +79,16 @@ class EmployeeApiControllerErrorHandling {
         return ApiError.EMPLOYEE_NOT_FOUND.toResponseEntity()
     }
 
-    @ExceptionHandler(EmployeeConstraintViolationException::class)
-    fun handleConflictingEmployeeException(ex: EmployeeConstraintViolationException): ResponseEntity<ErrorResponse> {
+    @ExceptionHandler(EmployeeConstraintAlreadyInUseException::class)
+    fun handleConflictingEmployeeException(ex: EmployeeConstraintAlreadyInUseException): ResponseEntity<ErrorResponse> {
         logger.warn(ex.message, ex)
-        return ApiError.EMPLOYEE_CONFLICTING_OPERATION.toResponseEntity()
+        return ApiError.EMPLOYEE_ADDRESS_ALREADY_IN_USE.toResponseEntity()
+    }
+
+    @ExceptionHandler(EmployeeFieldsTooLargeException::class)
+    fun handleEmployeeFieldsTooLargeException(ex: EmployeeFieldsTooLargeException): ResponseEntity<ErrorResponse> {
+        logger.warn(ex.message, ex)
+        return ApiError.BAD_REQUEST.toResponseEntity()
     }
 }
 
