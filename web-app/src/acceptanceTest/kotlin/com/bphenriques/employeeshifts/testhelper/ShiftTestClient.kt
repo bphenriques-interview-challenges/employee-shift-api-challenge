@@ -25,7 +25,7 @@ class ShiftTestClient(
     fun findShiftsByEmployeeId(employeeIds: List<Int>): WebTestClient.ResponseSpec =
         webTestClient.get()
             .uri(
-                UriComponentsBuilder.fromPath("/shifts/find")
+                UriComponentsBuilder.fromPath("/shifts")
                     .queryParam("employee_ids", employeeIds)
                     .build()
                     .toUri()
