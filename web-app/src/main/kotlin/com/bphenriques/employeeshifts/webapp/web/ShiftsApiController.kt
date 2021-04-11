@@ -55,7 +55,7 @@ class ShiftApiController(
             ApiResponse(responseCode = "200", description = "Successful operation")
         ]
     )
-    @GetMapping("/find")
+    @GetMapping
     suspend fun find(@RequestParam(name = "employee_ids") employeeIds: List<Int>): ResponseEntity<List<ShiftResponse>> {
         val fetchedShifts = shiftService.findByEmployeeIds(employeeIds)
         return ResponseEntity.ok(fetchedShifts.map { ShiftResponse.fromShift(it) })
