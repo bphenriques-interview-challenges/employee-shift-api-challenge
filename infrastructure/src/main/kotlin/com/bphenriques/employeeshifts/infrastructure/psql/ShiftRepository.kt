@@ -78,9 +78,11 @@ class ShiftRepository(
         }
 
     override suspend fun delete(ids: List<Int>) {
-        val idsList = ids.toList()
-        rawShiftRepository.deleteAllById(idsList)
-        logger.info("[DELETE SHIFT] Deleted $idsList")
+        if (ids.isNotEmpty()) {
+            val idsList = ids.toList()
+            rawShiftRepository.deleteAllById(idsList)
+            logger.info("[DELETE SHIFT] Deleted $idsList")
+        }
     }
 
     private fun Shift.toShiftRow() = ShiftRow(
