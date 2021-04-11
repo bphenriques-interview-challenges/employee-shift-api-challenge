@@ -2,7 +2,8 @@
 
 # Employee Shift API
 
-The project's description is available [here](docs/project.md).
+The project's description is available [here](docs/project.md). This was made as part of a challenge in early 2021. Let
+me know how you would approach the project!
 
 ---
 
@@ -11,11 +12,10 @@ The application explores:
 - [Spring Data](https://docs.spring.io/spring-data/jdbc/docs/current/reference/html/).
 - [Spring Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html).
 - [Swagger + SprintBoot](https://www.baeldung.com/swagger-2-documentation-for-spring-rest-api).
+- Gradle Kotlin DSL, `buildSrc` and submodules.
 - Containerization either through [docker-compose](https://docs.docker.com/compose/) or through [Kubernetes](k8s/README.md).
 
 I left some notes regarding production readiness at [docs/production-checklist.md](docs/production-checklist.md).
-
-**Note:** This project was made as part of a challenge. What would you do differently?
 
 # Development
 
