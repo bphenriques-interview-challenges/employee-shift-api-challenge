@@ -2,16 +2,20 @@
 
 # Employee Shift API
 
-The challenge description is available [here](docs/challenge.md).
+The project's description is available [here](docs/project.md).
 
 ---
 
-The application explores the [Hexagonal](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)) architecture 
-leveraging Spring-Boot's dependency injection and [Spring Data](https://docs.spring.io/spring-data/jdbc/docs/current/reference/html/).
+The application explores:
+- [Hexagonal](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)) architecture leveraging Spring-Boot's dependency injection
+- [Spring Data](https://docs.spring.io/spring-data/jdbc/docs/current/reference/html/).
+- [Spring Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html).
+- [Swagger + SprintBoot](https://www.baeldung.com/swagger-2-documentation-for-spring-rest-api).
+- Containerization either through [docker-compose](https://docs.docker.com/compose/) or through [Kubernetes](k8s/README.md).
 
-The is a `Dockerfile` available that can be used to build a docker image deployable on, for example, [Kubernetes](k8s/README.md).
+I left some notes regarding production readiness at [docs/production-checklist.md](docs/production-checklist.md).
 
-You may find some notes on production readiness under [docs/production-checklist.md](docs/production-checklist.md).
+**Note:** This project was made as part of a challenge. What would you do differently?
 
 # Development
 
