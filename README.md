@@ -2,7 +2,7 @@
 
 # Employee Shift API
 
-The project's description is available [here](docs/project.md). This was made as part of a challenge in early 2021. Let
+The project's description is available in [docs/requirements.md](docs/requirements.md). This was made as part of a challenge in early 2021. Let
 me know how you would approach the project!
 
 ---
@@ -15,7 +15,7 @@ The application explores:
 - Gradle Kotlin DSL, `buildSrc` and submodules.
 - Containerization either through [docker-compose](https://docs.docker.com/compose/) or through [Kubernetes](k8s/README.md).
 
-I left some notes regarding production readiness at [docs/production-checklist.md](docs/production-checklist.md).
+You will find my notes on the project under [docs/project-notes.md](docs/project-notes.md), and notes regarding production readiness under [docs/production-checklist.md](docs/production-checklist.md).
 
 # Development
 
