@@ -1,4 +1,11 @@
-<img src="https://github.com/bphenriques-lab/employee-shift-api-challenge/actions/workflows/build.yaml/badge.svg" />
+<p align="center">
+  <img src="https://github.com/bphenriques-lab/employee-shift-api-challenge/actions/workflows/build.yaml/badge.svg" />
+  <img alt="Kotlin" src="https://img.shields.io/static/v1?style=flat-square&logo=Kotlin&label=&message=Kotlin&color=gray">
+  <img alt="Spring Boot" src="https://img.shields.io/static/v1?style=flat-square&logo=Spring&label=&message=Spring%20Boot&color=gray">
+  <img alt="PostgreSQL" src="https://img.shields.io/static/v1?style=flat-square&logo=PostgreSQL&label=&message=PostgreSQL&color=gray">
+  <img alt="Docker" src="https://img.shields.io/static/v1?style=flat-square&logo=Docker&label=&message=Docker&color=gray">
+  <img alt="Kubernetes" src="https://img.shields.io/static/v1?style=flat-square&logo=Kubernetes&label=&message=Kubernetes&color=gray">
+</p>
 
 # Employee Shift API
 
