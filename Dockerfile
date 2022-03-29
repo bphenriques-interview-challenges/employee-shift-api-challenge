@@ -1,5 +1,5 @@
 FROM adoptopenjdk/openjdk11:debian-slim as BUILD_IMAGE
-MAINTAINER Bruno Henriques (bphenriques@outlook.com)
+MAINTAINER Bruno Henriques
 
 ARG DOCKERIZE_VERSION=v0.6.1
 ENV GRADLE_OPTS "-Dorg.gradle.daemon=false"
